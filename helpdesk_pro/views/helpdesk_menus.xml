@@ -41,4 +41,12 @@
         action="helpdesk_tag_action"
         sequence="20"
     />
+
+    <menuitem
+        id="helpdesk_menu_sla"
+        name="SLA Policies"
+        parent="helpdesk_menu_configuration"
+        action="helpdesk_sla_action"
+        sequence="30"
+    />
 </odoo>
