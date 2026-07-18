@@ -14,6 +14,8 @@ class HelpdeskTag(models.Model):  # pylint: disable=too-few-public-methods
     name = fields.Char(required=True, translate=True)
     color = fields.Integer(string="Color Index")
 
-    _sql_constraints = [
-        ("name_uniq", "unique (name)", "A tag with this name already exists."),
-    ]
+    # PORT-19: _sql_constraints is replaced by the models.Constraint API.
+    _name_uniq = models.Constraint(
+        "unique(name)",
+        "A tag with this name already exists.",
+    )
