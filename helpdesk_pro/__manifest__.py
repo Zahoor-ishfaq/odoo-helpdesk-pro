@@ -1,3 +1,7 @@
+# pylint: disable=missing-module-docstring,pointless-statement
+# Odoo loads this file via ast.literal_eval(), which requires the file to
+# contain exactly one bare expression -- no docstring or other statement
+# can precede the dict literal.
 {
     "name": "Helpdesk Pro - SLA, Ratings & Email Support",
     "summary": "Enterprise-grade helpdesk: SLA engine, CSAT ratings, "
@@ -12,6 +16,7 @@
         "security/helpdesk_security.xml",
         "security/ir.model.access.csv",
         "data/helpdesk_stage_data.xml",
+        "data/ir_sequence_data.xml",
     ],
     "demo": [],
     "installable": True,

@@ -1,7 +1,13 @@
+"""Helpdesk stage: kanban pipeline step for tickets."""
+
+# pylint: disable=import-error
+# odoo is not installed in the isolated pylint-odoo pre-commit environment.
 from odoo import fields, models
 
 
-class HelpdeskStage(models.Model):
+class HelpdeskStage(models.Model):  # pylint: disable=too-few-public-methods
+    """A kanban pipeline stage shared by helpdesk tickets."""
+
     _name = "helpdesk.stage"
     _description = "Helpdesk Stage"
     _order = "sequence, id"
