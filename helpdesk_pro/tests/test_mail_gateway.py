@@ -106,7 +106,14 @@ class TestHelpdeskMailGateway(MailCommon):
         self.assertEqual(len(ack_mail), 1)
         self.assertEqual(ack_mail.state, "outgoing")
         self.assertIn(ticket.ref, ack_mail.subject)
-        self.assertIn(self.known_partner.email, ack_mail.email_to)
+        # A rendered email_to that matches an existing partner can be
+        # resolved into recipient_ids instead of staying a flat string
+        # (observed on 19.0) -- check both so this works on either.
+        self.assertTrue(
+            self.known_partner.email in (ack_mail.email_to or "")
+            or self.known_partner in ack_mail.recipient_ids,
+            "ack email should be addressed to the known partner",
+        )
 
         manual_ticket = self.env["helpdesk.ticket"].create(
             {"name": "Manual ticket", "team_id": self.team.id}
