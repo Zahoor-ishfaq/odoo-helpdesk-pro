@@ -8,7 +8,11 @@
     "website": "https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro",
     "license": "LGPL-3",
     "depends": ["mail", "portal", "resource"],
-    "data": [],
+    "data": [
+        "security/helpdesk_security.xml",
+        "security/ir.model.access.csv",
+        "data/helpdesk_stage_data.xml",
+    ],
     "demo": [],
     "installable": True,
     "application": True,
