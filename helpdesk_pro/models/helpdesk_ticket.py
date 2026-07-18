@@ -1,8 +1,12 @@
 """Helpdesk ticket: a single customer support request."""
 
+import logging
+
 # pylint: disable=import-error
 # odoo is not installed in the isolated pylint-odoo pre-commit environment.
-from odoo import api, fields, models
+from odoo import _, api, fields, models, tools
+
+_logger = logging.getLogger(__name__)
 
 
 class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
@@ -63,3 +67,62 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
                     self.env["ir.sequence"].next_by_code("helpdesk.ticket") or "New"
                 )
         return super().create(vals_list)
+
+    @api.model
+    def message_new(self, msg_dict, custom_values=None):
+        """Create a ticket from an inbound email (see mail.thread).
+
+        team_id comes from the alias's own defaults (helpdesk.team's
+        _alias_get_creation_values), not from anything parsed here.
+        """
+        defaults = dict(custom_values or {})
+        defaults.setdefault("name", msg_dict.get("subject") or _("No Subject"))
+        defaults.setdefault("description", msg_dict.get("body"))
+        # pylint: disable=broad-except
+        # Inbound mail must never crash the gateway: any unexpected shape
+        # here (missing/garbled headers) falls back to a bare ticket.
+        try:
+            email_from = msg_dict.get("email_from") or ""
+            pairs = tools.email_split_tuples(email_from)
+            name, email = pairs[0] if pairs else ("", email_from)
+            defaults.setdefault("partner_email", email)
+            defaults.setdefault("partner_name", name or email)
+            if msg_dict.get("author_id"):
+                defaults.setdefault("partner_id", msg_dict["author_id"])
+        except Exception:
+            _logger.warning(
+                "helpdesk: could not parse sender %r on inbound email %r, "
+                "falling back to a bare ticket",
+                msg_dict.get("email_from"),
+                msg_dict.get("message_id"),
+                exc_info=True,
+            )
+        ticket = super().message_new(msg_dict, custom_values=defaults)
+        ticket._send_ack_email()  # pylint: disable=protected-access
+        return ticket
+
+    def message_update(self, msg_dict, update_vals=None):
+        """Reopen a closed ticket when the customer replies (see mail.thread).
+
+        Threading the reply into the chatter itself is already handled by
+        the mail gateway (message_post, called separately by
+        _message_route_process) -- this only needs the reopen side effect.
+        """
+        open_stage = self.env["helpdesk.stage"].search(
+            [("is_closed", "=", False)], order="sequence", limit=1
+        )
+        for ticket in self:
+            if ticket.stage_id.is_closed and open_stage:
+                ticket.stage_id = open_stage
+        return super().message_update(msg_dict, update_vals=update_vals)
+
+    def _send_ack_email(self):
+        """Queue the "ticket received" acknowledgement for email-created tickets."""
+        self.ensure_one()
+        if not self.partner_email:
+            return
+        template = self.env.ref(
+            "helpdesk_pro.mail_template_ticket_received", raise_if_not_found=False
+        )
+        if template:
+            template.send_mail(self.id, force_send=False)
