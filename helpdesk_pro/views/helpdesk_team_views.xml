@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="helpdesk_team_view_form" model="ir.ui.view">
+        <field name="name">helpdesk.team.form</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <form string="Helpdesk Team">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            name="action_view_tickets"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-ticket"
+                        >
+                            <field name="ticket_count" widget="statinfo" string="Tickets"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Customer Support"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="member_ids" widget="many2many_avatar_user"/>
+                            <field name="calendar_id"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- PORT-19: <tree> becomes <list> -->
+    <record id="helpdesk_team_view_list" model="ir.ui.view">
+        <field name="name">helpdesk.team.list</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <tree string="Teams">
+                <field name="name"/>
+                <field name="member_ids" widget="many2many_avatar_user"/>
+                <field name="calendar_id"/>
+                <field name="ticket_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="helpdesk_team_view_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.team.kanban</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard">
+                <field name="name"/>
+                <field name="ticket_count"/>
+                <field name="color"/>
+                <field name="member_ids"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div
+                            t-attf-class="oe_kanban_card oe_kanban_global_click #{kanban_color(record.color.raw_value)}"
+                        >
+                            <div class="o_kanban_card_header">
+                                <div class="o_kanban_card_header_title">
+                                    <span class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="container o_kanban_card_content">
+                                <div class="row">
+                                    <div class="col-6 o_kanban_primary_left">
+                                        <button
+                                            class="btn btn-primary"
+                                            name="action_view_tickets"
+                                            type="object"
+                                        >
+                                            <field name="ticket_count"/> Tickets
+                                        </button>
+                                    </div>
+                                    <div class="col-6 o_kanban_primary_right text-end">
+                                        <field
+                                            name="member_ids"
+                                            widget="many2many_avatar_user"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="helpdesk_team_action" model="ir.actions.act_window">
+        <field name="name">Teams</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first helpdesk team
+            </p>
+        </field>
+    </record>
+</odoo>

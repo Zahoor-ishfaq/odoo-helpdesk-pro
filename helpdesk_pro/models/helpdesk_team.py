@@ -40,3 +40,14 @@ class HelpdeskTeam(models.Model):  # pylint: disable=too-few-public-methods
         counts = {team.id: count for team, count in data}
         for team in self:
             team.ticket_count = counts.get(team.id, 0)
+
+    def action_view_tickets(self):
+        """Open this team's tickets, pre-filtered to this team."""
+        self.ensure_one()
+        # pylint: disable=protected-access
+        action = self.env["ir.actions.act_window"]._for_xml_id(
+            "helpdesk_pro.helpdesk_ticket_action"
+        )
+        action["domain"] = [("team_id", "=", self.id)]
+        action["context"] = {"default_team_id": self.id}
+        return action
