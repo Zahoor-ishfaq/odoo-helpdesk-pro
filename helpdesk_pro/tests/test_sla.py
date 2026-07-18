@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
+from .common import make_mon_fri_calendar
+
 
 @tagged("post_install", "-at_install")
 class TestHelpdeskSla(TransactionCase):
@@ -16,26 +18,7 @@ class TestHelpdeskSla(TransactionCase):
     def setUpClass(cls):  # pylint: disable=invalid-name
         """Create a team on a Mon-Fri 9-17 UTC calendar shared by all tests."""
         super().setUpClass()
-        calendar = cls.env["resource.calendar"].create(
-            {
-                "name": "Mon-Fri 9-17",
-                "tz": "UTC",
-                "attendance_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "name": f"Day {day}",
-                            "dayofweek": str(day),
-                            "hour_from": 9,
-                            "hour_to": 17,
-                            "day_period": "morning",
-                        },
-                    )
-                    for day in range(5)
-                ],
-            }
-        )
+        calendar = make_mon_fri_calendar(cls.env)
         cls.team = cls.env["helpdesk.team"].create(
             {"name": "SLA Team", "calendar_id": calendar.id}
         )
