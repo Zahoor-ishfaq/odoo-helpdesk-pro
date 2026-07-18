@@ -35,4 +35,10 @@
         <field name="model_id" ref="model_helpdesk_ticket"/>
         <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
     </record>
+
+    <record id="helpdesk_sla_comp_rule" model="ir.rule">
+        <field name="name">Helpdesk SLA: multi-company</field>
+        <field name="model_id" ref="model_helpdesk_sla"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
 </odoo>
