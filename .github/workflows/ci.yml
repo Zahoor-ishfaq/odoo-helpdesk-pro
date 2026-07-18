@@ -45,8 +45,16 @@ jobs:
         run: |
           docker run --rm \
             --network host \
+            --user root \
             -e HOST=localhost -e PORT=5432 -e USER=odoo -e PASSWORD=odoo \
             -v ${{ github.workspace }}/helpdesk_pro:/mnt/extra-addons/helpdesk_pro \
             "$ODOO_IMAGE" \
-            odoo -d ci_test -i helpdesk_pro \
-              --test-enable --test-tags /helpdesk_pro --stop-after-init
+            bash -c "
+              apt-get update -qq &&
+              apt-get install -y -qq curl >/dev/null &&
+              curl -sS -o /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &&
+              apt-get install -y -qq /tmp/chrome.deb >/dev/null &&
+              pip install -q websocket-client &&
+              odoo -d ci_test -i helpdesk_pro --test-enable --test-tags /helpdesk_pro --stop-after-init \
+                --db_host=localhost --db_port=5432 --db_user=odoo --db_password=odoo
+            "
