@@ -54,43 +54,43 @@
         <field name="name">helpdesk.team.kanban</field>
         <field name="model">helpdesk.team</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_dashboard">
+            <!-- PORT-19: kanban template renamed kanban-box -> card, with a
+                 separate "menu" template for the kebab dropdown (color
+                 picker); no manual oe_kanban_card wrapper or dropdown
+                 markup needed, the framework generates both now. Pattern
+                 matches core (project/views/project_project_views.xml). -->
+            <kanban highlight_color="color" class="o_kanban_dashboard">
                 <field name="name"/>
                 <field name="ticket_count"/>
                 <field name="color"/>
                 <field name="member_ids"/>
                 <templates>
-                    <t t-name="kanban-box">
-                        <div
-                            t-attf-class="oe_kanban_card oe_kanban_global_click #{kanban_color(record.color.raw_value)}"
-                        >
-                            <div class="o_kanban_card_header">
-                                <div class="o_kanban_card_header_title">
-                                    <span class="o_kanban_record_title">
-                                        <field name="name"/>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="container o_kanban_card_content">
-                                <div class="row">
-                                    <div class="col-6 o_kanban_primary_left">
-                                        <button
-                                            class="btn btn-primary"
-                                            name="action_view_tickets"
-                                            type="object"
-                                        >
-                                            <field name="ticket_count"/> Tickets
-                                        </button>
-                                    </div>
-                                    <div class="col-6 o_kanban_primary_right text-end">
-                                        <field
-                                            name="member_ids"
-                                            widget="many2many_avatar_user"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                    <t t-name="menu" groups="base.group_user">
+                        <div role="menuitem">
+                            <field name="color" widget="kanban_color_picker"/>
                         </div>
+                    </t>
+                    <t t-name="card">
+                        <main>
+                            <span class="text-truncate d-block fs-5 fw-bold">
+                                <field name="name"/>
+                            </span>
+                        </main>
+                        <footer>
+                            <a
+                                name="action_view_tickets"
+                                type="object"
+                                class="d-flex align-items-baseline"
+                            >
+                                <field name="ticket_count" class="o_value me-1"/>
+                                <span>Tickets</span>
+                            </a>
+                            <field
+                                name="member_ids"
+                                widget="many2many_avatar_user"
+                                class="ms-auto"
+                            />
+                        </footer>
                     </t>
                 </templates>
             </kanban>
