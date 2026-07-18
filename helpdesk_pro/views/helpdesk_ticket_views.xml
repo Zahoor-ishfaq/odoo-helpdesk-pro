@@ -24,6 +24,17 @@
                             <field name="priority" widget="priority"/>
                         </div>
                     </div>
+                    <group string="SLA" invisible="not sla_id">
+                        <field name="sla_id" readonly="1"/>
+                        <field name="sla_deadline" readonly="1"/>
+                        <field
+                            name="sla_status"
+                            widget="badge"
+                            decoration-success="sla_status == 'ok'"
+                            decoration-warning="sla_status == 'at_risk'"
+                            decoration-danger="sla_status == 'breached'"
+                        />
+                    </group>
                     <group>
                         <group>
                             <field name="team_id"/>
