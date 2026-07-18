@@ -5,7 +5,7 @@
 from odoo import api, fields, models
 
 
-class HelpdeskTicket(models.Model):
+class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     """A customer support ticket moving through a team's stage pipeline."""
 
     _name = "helpdesk.ticket"
@@ -15,9 +15,7 @@ class HelpdeskTicket(models.Model):
 
     name = fields.Char(string="Subject", required=True, tracking=True)
     ref = fields.Char(default="New", readonly=True, copy=False)
-    team_id = fields.Many2one(
-        "helpdesk.team", required=True, index=True, tracking=True
-    )
+    team_id = fields.Many2one("helpdesk.team", required=True, index=True, tracking=True)
     stage_id = fields.Many2one(
         "helpdesk.stage",
         required=True,
@@ -49,14 +47,16 @@ class HelpdeskTicket(models.Model):
     company_id = fields.Many2one(
         "res.company", required=True, default=lambda self: self.env.company
     )
+    color = fields.Integer(string="Color Index", default=0)
     active = fields.Boolean(default=True)
 
     @api.model
-    def _read_group_stage_ids(self, stages, domain, order):
+    def _read_group_stage_ids(self, stages, _domain, order):
         return stages.search([], order=order)
 
     @api.model_create_multi
     def create(self, vals_list):
+        """Assign the next TKT/YYYY/NNNNN sequence value to new tickets."""
         for vals in vals_list:
             if vals.get("ref", "New") == "New":
                 vals["ref"] = (
