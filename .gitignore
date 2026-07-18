@@ -4,5 +4,6 @@ __pycache__/
 *.log
 CLAUDE.md
 PROJECT_BLUEPRINT.md
+FUTURE_IDEAS.md
 scripts/
 .env
