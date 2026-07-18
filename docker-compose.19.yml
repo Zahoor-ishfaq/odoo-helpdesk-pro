@@ -3,8 +3,12 @@ services:
     image: odoo:19.0
     depends_on: [db19]
     ports: ["8079:8069"]
+    environment:
+      HOST: db19
+      USER: odoo
+      PASSWORD: odoo
     volumes:
-      - ./helpdesk_pro:/mnt/extra-addons/helpdesk_pro
+      - ../helpdesk_pro_19/helpdesk_pro:/mnt/extra-addons/helpdesk_pro
       - odoo19-web:/var/lib/odoo
     command: odoo --dev=all
   db19:
