@@ -9,6 +9,13 @@ from odoo.tools.mail import email_split_tuples
 
 _logger = logging.getLogger(__name__)
 
+HELPDESK_PRIORITY_SELECTION = [
+    ("0", "Low"),
+    ("1", "Medium"),
+    ("2", "High"),
+    ("3", "Urgent"),
+]
+
 
 class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     """A customer support ticket moving through a team's stage pipeline."""
@@ -34,19 +41,12 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     user_id = fields.Many2one(
         "res.users", string="Assigned to", index=True, tracking=True
     )
-    partner_id = fields.Many2one("res.partner", string="Customer", tracking=True)
+    partner_id = fields.Many2one(
+        "res.partner", string="Customer", index=True, tracking=True
+    )
     partner_email = fields.Char(string="Customer Email")
     partner_name = fields.Char(string="Customer Name")
-    priority = fields.Selection(
-        [
-            ("0", "Low"),
-            ("1", "Medium"),
-            ("2", "High"),
-            ("3", "Urgent"),
-        ],
-        default="1",
-        required=True,
-    )
+    priority = fields.Selection(HELPDESK_PRIORITY_SELECTION, default="1", required=True)
     tag_ids = fields.Many2many("helpdesk.tag", string="Tags")
     description = fields.Html()
     company_id = fields.Many2one(
@@ -55,9 +55,94 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     color = fields.Integer(string="Color Index", default=0)
     active = fields.Boolean(default=True)
 
+    sla_id = fields.Many2one(
+        "helpdesk.sla",
+        string="SLA Policy",
+        compute="_compute_sla_id",
+        store=True,
+        help="Most specific active policy matching this ticket's team, "
+        "priority and tags.",
+    )
+    sla_deadline = fields.Datetime(
+        compute="_compute_sla_deadline",
+        store=True,
+        index=True,
+        help="Working-hours deadline from the matched SLA policy. Frozen "
+        "once the ticket reaches a closed stage.",
+    )
+    sla_status = fields.Selection(
+        [
+            ("ok", "On Track"),
+            ("at_risk", "At Risk"),
+            ("breached", "Breached"),
+        ],
+        compute="_compute_sla_status",
+        store=True,
+        help="Frozen once the ticket reaches a closed stage.",
+    )
+    sla_reached = fields.Boolean(
+        default=False,
+        copy=False,
+        help="Set when the ticket entered a closed stage before its SLA " "deadline.",
+    )
+
     @api.model
     def _read_group_stage_ids(self, stages, _domain, order):
         return stages.search([], order=order)
+
+    @api.depends("team_id", "priority", "tag_ids")
+    def _compute_sla_id(self):
+        for ticket in self:
+            # pylint: disable=protected-access
+            ticket.sla_id = self.env["helpdesk.sla"]._search_best_match(
+                ticket.team_id, ticket.priority, ticket.tag_ids
+            )
+
+    @api.depends("sla_id", "team_id", "create_date")
+    def _compute_sla_deadline(self):
+        for ticket in self:
+            if ticket.stage_id.is_closed:
+                ticket.sla_deadline = ticket.sla_deadline  # frozen, no-op
+                continue
+            if not ticket.sla_id or not ticket.team_id.calendar_id:
+                ticket.sla_deadline = False
+                continue
+            start = ticket.create_date or fields.Datetime.now()
+            ticket.sla_deadline = ticket.team_id.calendar_id.plan_hours(
+                ticket.sla_id.target_hours, start, compute_leaves=True
+            )
+
+    @api.depends("sla_deadline", "sla_id.target_hours")
+    def _compute_sla_status(self):
+        now = fields.Datetime.now()
+        for ticket in self:
+            if ticket.stage_id.is_closed:
+                ticket.sla_status = ticket.sla_status  # frozen, no-op
+                continue
+            if not ticket.sla_id:
+                ticket.sla_status = False
+                continue
+            remaining = (ticket.sla_deadline - now).total_seconds()
+            if remaining <= 0:
+                ticket.sla_status = "breached"
+            elif remaining < 0.25 * (ticket.sla_id.target_hours * 3600):
+                ticket.sla_status = "at_risk"
+            else:
+                ticket.sla_status = "ok"
+
+    @api.model
+    def _cron_update_sla_status(self):
+        """Batch-refresh sla_status for open tickets (data/helpdesk_cron.xml).
+
+        The @api.depends compute keeps sla_status correct the instant a
+        relevant field changes, but elapsed time alone never triggers it --
+        only this periodic pass catches a deadline quietly slipping into
+        at_risk/breached with no field having changed.
+        """
+        tickets = self.search(
+            [("sla_deadline", "!=", False), ("stage_id.is_closed", "=", False)]
+        )
+        tickets._compute_sla_status()  # pylint: disable=protected-access
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -67,7 +152,39 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
                 vals["ref"] = (
                     self.env["ir.sequence"].next_by_code("helpdesk.ticket") or "New"
                 )
-        return super().create(vals_list)
+        tickets = super().create(vals_list)
+        # Force the SLA chain to compute and flush now, while the ticket is
+        # still in its just-created (open) stage. Left pending, these
+        # stored fields stay "to-compute" past this method returning --
+        # whatever next triggers a flush (e.g. a later write closing the
+        # ticket) would recompute them then, and the closed-stage freeze
+        # guard in _compute_sla_deadline/_compute_sla_status would see its
+        # own field still mid-computation and freeze it at the empty
+        # default instead of the real value it should have captured while
+        # still open.
+        tickets.flush_recordset(["sla_id", "sla_deadline", "sla_status"])
+        return tickets
+
+    def write(self, vals):
+        """Set sla_reached on the transition into a closed stage.
+
+        sla_deadline/sla_status are frozen simply by not depending on
+        stage_id -- this write is only about capturing the "reached before
+        deadline" fact at the moment it happens, which a depends-based
+        compute can't do (it sees resulting states, not transitions).
+        """
+        newly_closing = self.browse()
+        if vals.get("stage_id"):
+            new_stage = self.env["helpdesk.stage"].browse(vals["stage_id"])
+            if new_stage.is_closed:
+                newly_closing = self.filtered(lambda t: not t.stage_id.is_closed)
+        result = super().write(vals)
+        if newly_closing:
+            now = fields.Datetime.now()
+            for ticket in newly_closing:
+                if ticket.sla_id:
+                    ticket.sla_reached = now <= ticket.sla_deadline
+        return result
 
     @api.model
     def message_new(self, msg_dict, custom_values=None):
