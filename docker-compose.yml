@@ -1,0 +1,20 @@
+services:
+  web:
+    image: odoo:17.0
+    depends_on: [db]
+    ports: ["8069:8069"]
+    volumes:
+      - ./helpdesk_pro:/mnt/extra-addons/helpdesk_pro
+      - odoo17-web:/var/lib/odoo
+    command: odoo --dev=all
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+    volumes:
+      - odoo17-db:/var/lib/postgresql/data
+volumes:
+  odoo17-web:
+  odoo17-db:

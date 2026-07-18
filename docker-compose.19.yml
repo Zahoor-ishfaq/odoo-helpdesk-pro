@@ -1,0 +1,20 @@
+services:
+  web19:
+    image: odoo:19.0
+    depends_on: [db19]
+    ports: ["8079:8069"]
+    volumes:
+      - ./helpdesk_pro:/mnt/extra-addons/helpdesk_pro
+      - odoo19-web:/var/lib/odoo
+    command: odoo --dev=all
+  db19:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+      POSTGRES_DB: postgres
+    volumes:
+      - odoo19-db:/var/lib/postgresql/data
+volumes:
+  odoo19-web:
+  odoo19-db:
