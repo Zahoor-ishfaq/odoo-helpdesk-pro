@@ -4,7 +4,8 @@ import logging
 
 # pylint: disable=import-error
 # odoo is not installed in the isolated pylint-odoo pre-commit environment.
-from odoo import _, api, fields, models, tools
+from odoo import _, api, fields, models
+from odoo.tools.mail import email_split_tuples
 
 _logger = logging.getLogger(__name__)
 
@@ -86,7 +87,7 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         # here (missing/garbled headers) falls back to a bare ticket.
         try:
             email_from = msg_dict.get("email_from") or ""
-            pairs = tools.email_split_tuples(email_from)
+            pairs = email_split_tuples(email_from)
             name, email = pairs[0] if pairs else ("", email_from)
             defaults.setdefault("partner_email", email)
             defaults.setdefault("partner_name", name or email)
