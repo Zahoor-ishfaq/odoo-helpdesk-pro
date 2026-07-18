@@ -51,8 +51,11 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     active = fields.Boolean(default=True)
 
     @api.model
-    def _read_group_stage_ids(self, stages, _domain, order):
-        return stages.search([], order=order)
+    # PORT-19: group_expand callables are invoked with 2 args (records,
+    # domain), not 3 (records, domain, order) as on 17.0 -- order is no
+    # longer passed, so this relies on helpdesk.stage's own _order.
+    def _read_group_stage_ids(self, stages, _domain):
+        return stages.search([])
 
     @api.model_create_multi
     def create(self, vals_list):
