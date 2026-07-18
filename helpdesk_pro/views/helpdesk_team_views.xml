@@ -37,17 +37,16 @@
         </field>
     </record>
 
-    <!-- PORT-19: <tree> becomes <list> -->
     <record id="helpdesk_team_view_list" model="ir.ui.view">
         <field name="name">helpdesk.team.list</field>
         <field name="model">helpdesk.team</field>
         <field name="arch" type="xml">
-            <tree string="Teams">
+            <list string="Teams">
                 <field name="name"/>
                 <field name="member_ids" widget="many2many_avatar_user"/>
                 <field name="calendar_id"/>
                 <field name="ticket_count"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -101,7 +100,7 @@
     <record id="helpdesk_team_action" model="ir.actions.act_window">
         <field name="name">Teams</field>
         <field name="res_model">helpdesk.team</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first helpdesk team
