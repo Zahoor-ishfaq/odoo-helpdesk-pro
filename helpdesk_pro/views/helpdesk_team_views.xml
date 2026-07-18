@@ -32,6 +32,32 @@
                             <field name="active" invisible="1"/>
                         </group>
                     </group>
+                    <group string="Email Alias" groups="helpdesk_pro.group_helpdesk_manager">
+                        <div colspan="2">
+                            <!-- alias_id must be in the view for alias_domain_id to default correctly -->
+                            <field name="alias_id" invisible="1"/>
+                            <label
+                                for="alias_name"
+                                string="Create tickets by sending an email to"
+                            />
+                            <field
+                                name="alias_email"
+                                class="oe_read_only d-inline"
+                                widget="email"
+                                readonly="1"
+                                invisible="not alias_name"
+                            />
+                            <span class="oe_edit_only o_row">
+                                <field name="alias_name" placeholder="e.g. support"/>@
+                                <field
+                                    name="alias_domain_id"
+                                    class="oe_inline"
+                                    placeholder="e.g. domain.com"
+                                    options="{'no_create': True, 'no_open': True}"
+                                />
+                            </span>
+                        </div>
+                    </group>
                 </sheet>
             </form>
         </field>
