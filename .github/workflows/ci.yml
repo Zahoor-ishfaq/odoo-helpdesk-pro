@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: ["17.0", "19.0"]
+  pull_request:
+    branches: ["17.0", "19.0"]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install pre-commit
+      - run: pre-commit run -a
+
+  test:
+    runs-on: ubuntu-latest
+    # Each branch is named after the Odoo series it targets (17.0 / 19.0),
+    # so the branch name doubles as the odoo:<tag> and postgres major version
+    # to test against. github.base_ref is set on pull_request events (target
+    # branch); github.ref_name is set on push events (the branch itself).
+    services:
+      postgres:
+        image: postgres:${{ (github.base_ref || github.ref_name) == '19.0' && '16' || '15' }}
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install and test helpdesk_pro
+        env:
+          ODOO_IMAGE: odoo:${{ github.base_ref || github.ref_name }}
+        run: |
+          docker run --rm \
+            --network host \
+            -e HOST=localhost -e PORT=5432 -e USER=odoo -e PASSWORD=odoo \
+            -v ${{ github.workspace }}/helpdesk_pro:/mnt/extra-addons/helpdesk_pro \
+            "$ODOO_IMAGE" \
+            odoo -d ci_test -i helpdesk_pro \
+              --test-enable --test-tags /helpdesk_pro --stop-after-init
