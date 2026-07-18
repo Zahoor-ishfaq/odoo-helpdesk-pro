@@ -80,9 +80,8 @@ class TestHelpdeskUiViews(odoo.tests.HttpCase):
         )
         self.assertTrue(ticket.sla_id)
 
-        # PORT-19: start URL /web -> /odoo.
         self.browser_js(
-            "/web",
+            "/odoo",
             f"""
                 (async () => {{
                     await odoo.__WOWL_DEBUG__.root.env.services.action.doAction({{
