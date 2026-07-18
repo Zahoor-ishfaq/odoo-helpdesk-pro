@@ -56,7 +56,13 @@
         <field name="name">helpdesk.ticket.list</field>
         <field name="model">helpdesk.ticket</field>
         <field name="arch" type="xml">
-            <list string="Tickets" multi_edit="1">
+            <list
+                string="Tickets"
+                multi_edit="1"
+                decoration-danger="sla_status == 'breached'"
+                decoration-warning="sla_status == 'at_risk'"
+                decoration-success="sla_status == 'ok'"
+            >
                 <field name="ref"/>
                 <field name="name"/>
                 <field name="team_id" optional="show"/>
@@ -64,6 +70,7 @@
                 <field name="priority" optional="show" widget="priority"/>
                 <field name="tag_ids" widget="many2many_tags" optional="hide"/>
                 <field name="stage_id" optional="show"/>
+                <field name="sla_status" invisible="1"/>
             </list>
         </field>
     </record>
@@ -90,6 +97,7 @@
                 <field name="partner_id"/>
                 <field name="tag_ids"/>
                 <field name="team_id"/>
+                <field name="sla_status"/>
                 <templates>
                     <t t-name="menu" groups="base.group_user">
                         <div role="menuitem">
@@ -108,6 +116,20 @@
                                 widget="many2many_tags"
                                 options="{'color_field': 'color'}"
                             />
+                            <div t-if="record.sla_status.raw_value" class="mt-1">
+                                <span
+                                    t-if="record.sla_status.raw_value == 'breached'"
+                                    class="badge text-bg-danger"
+                                >SLA Breached</span>
+                                <span
+                                    t-elif="record.sla_status.raw_value == 'at_risk'"
+                                    class="badge text-bg-warning"
+                                >SLA At Risk</span>
+                                <span
+                                    t-elif="record.sla_status.raw_value == 'ok'"
+                                    class="badge text-bg-success"
+                                >SLA On Track</span>
+                            </div>
                         </main>
                         <footer>
                             <field name="priority" widget="priority"/>
@@ -138,6 +160,16 @@
                     string="Unassigned"
                     name="unassigned"
                     domain="[('user_id', '=', False)]"
+                />
+                <filter
+                    string="SLA Breached"
+                    name="sla_breached"
+                    domain="[('sla_status', '=', 'breached')]"
+                />
+                <filter
+                    string="SLA At Risk"
+                    name="sla_at_risk"
+                    domain="[('sla_status', '=', 'at_risk')]"
                 />
                 <separator/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
