@@ -4,6 +4,8 @@
 # odoo is not installed in the isolated pylint-odoo pre-commit environment.
 import odoo.tests
 
+from .common import make_mon_fri_calendar
+
 
 @odoo.tests.tagged("post_install", "-at_install")
 class TestHelpdeskUiViews(odoo.tests.HttpCase):
@@ -53,26 +55,7 @@ class TestHelpdeskUiViews(odoo.tests.HttpCase):
         expression on the new SLA group). Opened directly via the action
         service, the same hook clickbot itself uses to reach app state.
         """
-        calendar = self.env["resource.calendar"].create(
-            {
-                "name": "SLA form check calendar",
-                "tz": "UTC",
-                "attendance_ids": [
-                    (
-                        0,
-                        0,
-                        {
-                            "name": f"Day {day}",
-                            "dayofweek": str(day),
-                            "hour_from": 9,
-                            "hour_to": 17,
-                            "day_period": "morning",
-                        },
-                    )
-                    for day in range(5)
-                ],
-            }
-        )
+        calendar = make_mon_fri_calendar(self.env, name="SLA form check calendar")
         team = self.env["helpdesk.team"].create(
             {"name": "SLA Form Check", "calendar_id": calendar.id}
         )
