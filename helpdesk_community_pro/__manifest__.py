@@ -12,6 +12,13 @@
     "website": "https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro",
     "license": "LGPL-3",
     "depends": ["mail", "portal", "resource"],
+    "images": [
+        "static/description/banner.png",
+        "static/description/screenshots/ticket_kanban_en.png",
+        "static/description/screenshots/ticket_form_en.png",
+        "static/description/screenshots/portal_home_en.png",
+        "static/description/screenshots/analytics_pivot_en.png",
+    ],
     "data": [
         "security/helpdesk_security.xml",
         "security/ir.model.access.csv",
