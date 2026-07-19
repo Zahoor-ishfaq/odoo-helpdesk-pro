@@ -8,7 +8,7 @@ from odoo.http import request
 VALID_RATINGS = ("good", "okay", "bad")
 
 
-class HelpdeskRating(http.Controller):
+class HelpdeskRating(http.Controller):  # pylint: disable=too-few-public-methods
     """One-click satisfaction rating, reached from the CSAT email."""
 
     @http.route(
@@ -18,6 +18,9 @@ class HelpdeskRating(http.Controller):
         website=True,
     )
     def rate_ticket(self, ticket_id, token, rating, **kw):
+        # pylint: disable=unused-argument
+        # **kw absorbs stray query-string params so an unexpected one
+        # doesn't turn into a TypeError on this public route.
         """Validate the signed token and record the customer's rating.
 
         No record id from the URL is trusted without a check: the token is
