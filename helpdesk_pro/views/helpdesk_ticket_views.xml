@@ -35,6 +35,17 @@
                             decoration-danger="sla_status == 'breached'"
                         />
                     </group>
+                    <group string="Satisfaction" invisible="not rating">
+                        <field
+                            name="rating"
+                            readonly="1"
+                            widget="badge"
+                            decoration-success="rating == 'good'"
+                            decoration-warning="rating == 'okay'"
+                            decoration-danger="rating == 'bad'"
+                        />
+                        <field name="rating_date" readonly="1"/>
+                    </group>
                     <group>
                         <group>
                             <field name="team_id"/>

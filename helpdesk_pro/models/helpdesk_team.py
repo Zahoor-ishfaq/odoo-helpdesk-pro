@@ -6,6 +6,8 @@ import ast
 # odoo is not installed in the isolated pylint-odoo pre-commit environment.
 from odoo import fields, models
 
+RATING_SCORE = {"good": 100, "okay": 50, "bad": 0}
+
 
 class HelpdeskTeam(models.Model):  # pylint: disable=too-few-public-methods
     """A support team: members, working calendar and ticket queue."""
@@ -21,6 +23,17 @@ class HelpdeskTeam(models.Model):  # pylint: disable=too-few-public-methods
         "team; replies thread into the ticket's chatter."
     )
     ticket_count = fields.Integer(compute="_compute_ticket_count")
+    csat_enabled = fields.Boolean(
+        default=True,
+        help="Send a satisfaction rating email when a ticket from this "
+        "team is closed.",
+    )
+    csat_avg = fields.Float(
+        string="CSAT",
+        compute="_compute_csat_avg",
+        help="Average satisfaction score (Good=100 / Okay=50 / Bad=0) "
+        "over this team's rated tickets.",
+    )
     member_ids = fields.Many2many(
         "res.users",
         string="Team Members",
@@ -47,6 +60,24 @@ class HelpdeskTeam(models.Model):  # pylint: disable=too-few-public-methods
         counts = {team.id: count for team, count in data}
         for team in self:
             team.ticket_count = counts.get(team.id, 0)
+
+    def _compute_csat_avg(self):
+        # pylint: disable=protected-access
+        groups = self.env["helpdesk.ticket"]._read_group(
+            [("team_id", "in", self.ids), ("rating", "!=", False)],
+            ["team_id", "rating"],
+            ["__count"],
+        )
+        totals = {}
+        for team, rating, count in groups:
+            score_sum, ticket_count = totals.setdefault(team.id, [0, 0])
+            totals[team.id] = [
+                score_sum + RATING_SCORE[rating] * count,
+                ticket_count + count,
+            ]
+        for team in self:
+            score_sum, ticket_count = totals.get(team.id, (0, 0))
+            team.csat_avg = (score_sum / ticket_count) if ticket_count else 0.0
 
     def action_view_tickets(self):
         """Open this team's tickets, pre-filtered to this team."""
