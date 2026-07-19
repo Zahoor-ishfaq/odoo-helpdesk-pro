@@ -49,4 +49,12 @@
         action="helpdesk_sla_action"
         sequence="30"
     />
+
+    <menuitem
+        id="helpdesk_menu_canned_responses"
+        name="Canned Responses"
+        parent="helpdesk_menu_configuration"
+        action="helpdesk_canned_response_action"
+        sequence="40"
+    />
 </odoo>

@@ -204,6 +204,10 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         stage_id -- this write is only about capturing point-in-time facts
         (transitions) that a depends-based compute can't see, it only sees
         resulting states.
+
+        context key `skip_csat_email`: used by the merge wizard when it
+        closes the source ticket -- that closure isn't a real resolution,
+        so it shouldn't survey the customer.
         """
         newly_closing = self.browse()
         if vals.get("stage_id"):
@@ -228,7 +232,9 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
                 if ticket.sla_id:
                     ticket.sla_reached = now <= ticket.sla_deadline
                 ticket.close_date = now
-                if ticket.team_id.csat_enabled:
+                if ticket.team_id.csat_enabled and not self.env.context.get(
+                    "skip_csat_email"
+                ):
                     # pylint: disable=protected-access
                     ticket.rating_token = ticket._get_rating_token()
                     ticket._send_rating_email()
