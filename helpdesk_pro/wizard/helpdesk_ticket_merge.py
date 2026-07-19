@@ -29,6 +29,7 @@ class HelpdeskTicketMerge(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
+        """Default destination_ticket_id from the ticket this wizard opened from."""
         defaults = super().default_get(fields_list)
         if "destination_ticket_id" in fields_list and not defaults.get(
             "destination_ticket_id"

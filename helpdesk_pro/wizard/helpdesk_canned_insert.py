@@ -31,6 +31,7 @@ class HelpdeskCannedInsert(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
+        """Default ticket_id from the ticket form this wizard was opened from."""
         defaults = super().default_get(fields_list)
         if "ticket_id" in fields_list and not defaults.get("ticket_id"):
             defaults["ticket_id"] = self.env.context.get("active_id")
