@@ -1,13 +1,24 @@
 """Helpdesk ticket: a single customer support request."""
 
+import hashlib
+import hmac
 import logging
+from datetime import timedelta
 
 # pylint: disable=import-error
 # odoo is not installed in the isolated pylint-odoo pre-commit environment.
 from odoo import _, api, fields, models
+from odoo.tools import consteq
 from odoo.tools.mail import email_split_tuples
 
 _logger = logging.getLogger(__name__)
+
+RATING_SELECTION = [
+    ("good", "Good"),
+    ("okay", "Okay"),
+    ("bad", "Bad"),
+]
+RATING_WINDOW_DAYS = 7
 
 HELPDESK_PRIORITY_SELECTION = [
     ("0", "Low"),
@@ -84,6 +95,21 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         default=False,
         copy=False,
         help="Set when the ticket entered a closed stage before its SLA " "deadline.",
+    )
+
+    rating = fields.Selection(
+        RATING_SELECTION, copy=False, help="Empty until the customer rates the ticket."
+    )
+    rating_token = fields.Char(
+        copy=False, help="Signed token embedded in the CSAT email's rating links."
+    )
+    rating_date = fields.Datetime(copy=False)
+
+    assign_date = fields.Datetime(
+        copy=False, help="Set the first time the ticket is assigned to an agent."
+    )
+    close_date = fields.Datetime(
+        copy=False, help="Set the first time the ticket enters a closed stage."
     )
 
     @api.model
@@ -174,24 +200,41 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         return tickets
 
     def write(self, vals):
-        """Set sla_reached on the transition into a closed stage.
+        """Set sla_reached/close_date/CSAT request on the transition into a
+        closed stage, and assign_date on first assignment.
 
         sla_deadline/sla_status are frozen simply by not depending on
-        stage_id -- this write is only about capturing the "reached before
-        deadline" fact at the moment it happens, which a depends-based
-        compute can't do (it sees resulting states, not transitions).
+        stage_id -- this write is only about capturing point-in-time facts
+        (transitions) that a depends-based compute can't see, it only sees
+        resulting states.
         """
         newly_closing = self.browse()
         if vals.get("stage_id"):
             new_stage = self.env["helpdesk.stage"].browse(vals["stage_id"])
             if new_stage.is_closed:
                 newly_closing = self.filtered(lambda t: not t.stage_id.is_closed)
+
+        newly_assigned = self.browse()
+        if vals.get("user_id"):
+            newly_assigned = self.filtered(
+                lambda t: not t.user_id and not t.assign_date
+            )
+
         result = super().write(vals)
+
+        if newly_assigned:
+            newly_assigned.assign_date = fields.Datetime.now()
+
         if newly_closing:
             now = fields.Datetime.now()
             for ticket in newly_closing:
                 if ticket.sla_id:
                     ticket.sla_reached = now <= ticket.sla_deadline
+                ticket.close_date = now
+                if ticket.team_id.csat_enabled:
+                    # pylint: disable=protected-access
+                    ticket.rating_token = ticket._get_rating_token()
+                    ticket._send_rating_email()
         return result
 
     @api.model
@@ -249,6 +292,58 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
             return
         template = self.env.ref(
             "helpdesk_pro.mail_template_ticket_received", raise_if_not_found=False
+        )
+        if template:
+            template.send_mail(self.id, force_send=False)
+
+    def _get_rating_token(self):
+        """Deterministic signature for this ticket's public rating links.
+
+        hmac(db secret, ticket id) rather than a stored random value: the
+        public rating controller re-derives the same signature from the
+        URL's ticket_id and compares, so a token can never be replayed
+        against a different ticket_id. Still stored on the field (set once,
+        on close) purely so the mail template can render object.rating_token
+        directly without calling into Python.
+        """
+        self.ensure_one()
+        secret = self.env["ir.config_parameter"].sudo().get_param("database.secret")
+        payload = f"helpdesk.ticket-rating-{self.id}".encode()
+        return hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
+
+    def _rating_token_is_valid(self, token):
+        self.ensure_one()
+        return bool(token) and consteq(token, self._get_rating_token())
+
+    def _apply_rating(self, rating):
+        """Record a customer's CSAT click; returns False if the window has
+        closed.
+
+        First click sets rating + rating_date. Further clicks update the
+        rating value as long as they land within RATING_WINDOW_DAYS of that
+        *first* rating_date (rating_date itself never moves, so the window
+        doesn't reset/slide with each click) -- past it, the rating is
+        locked and this returns False without writing anything.
+        """
+        self.ensure_one()
+        now = fields.Datetime.now()
+        if self.rating_date and now > self.rating_date + timedelta(
+            days=RATING_WINDOW_DAYS
+        ):
+            return False
+        vals = {"rating": rating}
+        if not self.rating_date:
+            vals["rating_date"] = now
+        self.write(vals)
+        return True
+
+    def _send_rating_email(self):
+        """Queue the CSAT "how did we do" email for a just-closed ticket."""
+        self.ensure_one()
+        if not self.partner_email:
+            return
+        template = self.env.ref(
+            "helpdesk_pro.mail_template_ticket_rating", raise_if_not_found=False
         )
         if template:
             template.send_mail(self.id, force_send=False)
