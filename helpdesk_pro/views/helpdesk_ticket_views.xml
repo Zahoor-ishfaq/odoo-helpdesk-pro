@@ -226,14 +226,43 @@
                     name="group_by_priority"
                     context="{'group_by': 'priority'}"
                 />
+                <filter
+                    string="Rating"
+                    name="group_by_rating"
+                    context="{'group_by': 'rating'}"
+                />
             </search>
+        </field>
+    </record>
+
+    <record id="helpdesk_ticket_view_pivot" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.pivot</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <pivot string="Ticket Analysis">
+                <field name="team_id" type="row"/>
+                <field name="stage_id" type="col"/>
+                <field name="resolution_hours" type="measure"/>
+                <field name="open_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="helpdesk_ticket_view_graph" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.graph</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <graph string="Ticket Analysis" type="bar">
+                <field name="team_id"/>
+                <field name="resolution_hours" type="measure"/>
+            </graph>
         </field>
     </record>
 
     <record id="helpdesk_ticket_action" model="ir.actions.act_window">
         <field name="name">Tickets</field>
         <field name="res_model">helpdesk.ticket</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
         <field name="search_view_id" ref="helpdesk_ticket_view_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
