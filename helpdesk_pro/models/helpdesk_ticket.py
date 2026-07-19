@@ -35,6 +35,11 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     _description = "Helpdesk Ticket"
     _inherit = ["mail.thread", "mail.activity.mixin", "portal.mixin"]
     _order = "priority desc, id desc"
+    # Portal customers only have read access (ir.model.access.csv), but must
+    # still be able to reply from the portal chatter -- without this, mail's
+    # default _mail_post_access="write" silently blocks their composer (same
+    # pattern as project.task, which portal users also comment on).
+    _mail_post_access = "read"
 
     name = fields.Char(string="Subject", required=True, tracking=True)
     ref = fields.Char(default="New", readonly=True, copy=False)
