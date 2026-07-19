@@ -118,13 +118,6 @@ Lint before committing:
 pre-commit run -a
 ```
 
-## Contributing
-
-Issues and pull requests are welcome. This project follows OCA-style
-commit conventions and ships a `pre-commit` config
-(`black`, `isort`, `flake8`, `pylint-odoo`) — please run it before
-opening a PR.
-
 ## License
 
 [LGPL-3](LICENSE)
