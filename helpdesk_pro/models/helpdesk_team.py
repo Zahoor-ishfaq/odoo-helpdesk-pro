@@ -34,6 +34,18 @@ class HelpdeskTeam(models.Model):  # pylint: disable=too-few-public-methods
         help="Average satisfaction score (Good=100 / Okay=50 / Bad=0) "
         "over this team's rated tickets.",
     )
+    sla_compliance = fields.Float(
+        string="SLA Compliance",
+        compute="_compute_sla_compliance",
+        help="Percentage of this team's SLA-tracked, closed tickets that "
+        "met their deadline.",
+    )
+    avg_resolution_hours = fields.Float(
+        string="Avg. Resolution (h)",
+        compute="_compute_avg_resolution_hours",
+        help="Average calendar-aware working hours from creation to close "
+        "over this team's closed tickets.",
+    )
     member_ids = fields.Many2many(
         "res.users",
         string="Team Members",
@@ -78,6 +90,36 @@ class HelpdeskTeam(models.Model):  # pylint: disable=too-few-public-methods
         for team in self:
             score_sum, ticket_count = totals.get(team.id, (0, 0))
             team.csat_avg = (score_sum / ticket_count) if ticket_count else 0.0
+
+    def _compute_sla_compliance(self):
+        # pylint: disable=protected-access
+        groups = self.env["helpdesk.ticket"]._read_group(
+            [
+                ("team_id", "in", self.ids),
+                ("sla_id", "!=", False),
+                ("close_date", "!=", False),
+            ],
+            ["team_id", "sla_reached"],
+            ["__count"],
+        )
+        totals = {}
+        for team, sla_reached, count in groups:
+            met, total = totals.setdefault(team.id, [0, 0])
+            totals[team.id] = [met + (count if sla_reached else 0), total + count]
+        for team in self:
+            met, total = totals.get(team.id, (0, 0))
+            team.sla_compliance = (met / total * 100) if total else 0.0
+
+    def _compute_avg_resolution_hours(self):
+        # pylint: disable=protected-access
+        groups = self.env["helpdesk.ticket"]._read_group(
+            [("team_id", "in", self.ids), ("close_date", "!=", False)],
+            ["team_id"],
+            ["resolution_hours:avg"],
+        )
+        averages = {team.id: avg for team, avg in groups}
+        for team in self:
+            team.avg_resolution_hours = averages.get(team.id, 0.0)
 
     def action_view_tickets(self):
         """Open this team's tickets, pre-filtered to this team."""

@@ -111,6 +111,18 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     close_date = fields.Datetime(
         copy=False, help="Set the first time the ticket enters a closed stage."
     )
+    open_hours = fields.Float(
+        compute="_compute_open_hours",
+        store=True,
+        help="Calendar-aware working hours elapsed since creation. Frozen "
+        "once the ticket reaches a closed stage.",
+    )
+    resolution_hours = fields.Float(
+        compute="_compute_resolution_hours",
+        store=True,
+        help="Calendar-aware working hours from creation to close_date. "
+        "Zero while the ticket has never been closed.",
+    )
 
     @api.model
     def _read_group_stage_ids(self, stages, _domain, order):
@@ -175,6 +187,47 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         )
         tickets._compute_sla_status()  # pylint: disable=protected-access
 
+    @api.depends("create_date")
+    def _compute_open_hours(self):
+        now = fields.Datetime.now()
+        for ticket in self:
+            if ticket.stage_id.is_closed:
+                ticket.open_hours = ticket.open_hours  # frozen, no-op
+                continue
+            if not ticket.create_date or not ticket.team_id.calendar_id:
+                ticket.open_hours = 0.0
+                continue
+            duration = ticket.team_id.calendar_id.get_work_duration_data(
+                ticket.create_date, now, compute_leaves=True
+            )
+            ticket.open_hours = duration["hours"]
+
+    @api.depends("close_date")
+    def _compute_resolution_hours(self):
+        for ticket in self:
+            if (
+                not ticket.close_date
+                or not ticket.create_date
+                or not ticket.team_id.calendar_id
+            ):
+                ticket.resolution_hours = 0.0
+                continue
+            duration = ticket.team_id.calendar_id.get_work_duration_data(
+                ticket.create_date, ticket.close_date, compute_leaves=True
+            )
+            ticket.resolution_hours = duration["hours"]
+
+    @api.model
+    def _cron_update_open_hours(self):
+        """Batch-refresh open_hours for all open tickets (data/helpdesk_cron.xml).
+
+        Broader domain than _cron_update_sla_status on purpose: a ticket
+        with no matching SLA policy still has an age worth tracking for
+        analytics, it just has no deadline to breach.
+        """
+        tickets = self.search([("stage_id.is_closed", "=", False)])
+        tickets._compute_open_hours()  # pylint: disable=protected-access
+
     @api.model_create_multi
     def create(self, vals_list):
         """Assign the next TKT/YYYY/NNNNN sequence value to new tickets."""
@@ -193,7 +246,9 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         # own field still mid-computation and freeze it at the empty
         # default instead of the real value it should have captured while
         # still open.
-        tickets.flush_recordset(["sla_id", "sla_deadline", "sla_status"])
+        tickets.flush_recordset(
+            ["sla_id", "sla_deadline", "sla_status", "open_hours", "resolution_hours"]
+        )
         return tickets
 
     def write(self, vals):

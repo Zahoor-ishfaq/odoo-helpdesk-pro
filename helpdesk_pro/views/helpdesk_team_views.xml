@@ -29,6 +29,32 @@
                                 digits="[0, 0]"
                             />
                         </button>
+                        <button
+                            name="action_view_tickets"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-check-circle"
+                        >
+                            <field
+                                name="sla_compliance"
+                                widget="statinfo"
+                                string="SLA Compliance"
+                                digits="[0, 0]"
+                            />
+                        </button>
+                        <button
+                            name="action_view_tickets"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-clock-o"
+                        >
+                            <field
+                                name="avg_resolution_hours"
+                                widget="statinfo"
+                                string="Avg. Resolution (h)"
+                                digits="[0, 1]"
+                            />
+                        </button>
                     </div>
                     <div class="oe_title">
                         <label for="name"/>
@@ -89,6 +115,8 @@
                 <field name="calendar_id"/>
                 <field name="ticket_count"/>
                 <field name="csat_avg" digits="[0, 0]" optional="show"/>
+                <field name="sla_compliance" digits="[0, 0]" optional="show"/>
+                <field name="avg_resolution_hours" digits="[0, 1]" optional="show"/>
             </tree>
         </field>
     </record>
