@@ -57,9 +57,7 @@ class TestHelpdeskRating(HttpCase):
 
     def test_second_rating_within_window_updates(self):
         """A repeat click inside the window updates the value, not the anchor."""
-        self.url_open(
-            f"/helpdesk/rate/{self.ticket.id}/{self.ticket.rating_token}/bad"
-        )
+        self.url_open(f"/helpdesk/rate/{self.ticket.id}/{self.ticket.rating_token}/bad")
         self.ticket.invalidate_recordset(["rating", "rating_date"])
         self.assertEqual(self.ticket.rating, "bad")
         first_rating_date = self.ticket.rating_date
