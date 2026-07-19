@@ -31,7 +31,9 @@
         "views/portal_templates.xml",
         "views/rating_templates.xml",
     ],
-    "demo": [],
+    "demo": [
+        "demo/helpdesk_demo.xml",
+    ],
     "installable": True,
     "application": True,
 }
