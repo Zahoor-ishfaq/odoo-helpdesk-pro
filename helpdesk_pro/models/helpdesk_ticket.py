@@ -55,7 +55,11 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         group_expand="_read_group_stage_ids",
     )
     user_id = fields.Many2one(
-        "res.users", string="Assigned to", index=True, tracking=True
+        "res.users",
+        string="Assigned to",
+        index=True,
+        tracking=True,
+        domain=[("share", "=", False)],
     )
     partner_id = fields.Many2one(
         "res.partner", string="Customer", index=True, tracking=True
