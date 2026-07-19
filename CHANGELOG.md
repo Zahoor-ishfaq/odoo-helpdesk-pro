@@ -6,9 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versions follow Odoo's `<series>.<major>.<minor>.<patch>.<build>` tagging
 convention (e.g. `v17.0.1.0.0`), tagged separately per supported series.
 
-## [1.0.0] - Unreleased
+## [1.0.0] - 2026-07-19
 
-Initial release. Supports Odoo 17.0 and 19.0 in parallel.
+Initial release. Supports Odoo 17.0 and 19.0 in parallel, tagged
+separately as `v17.0.1.0.0` and `v19.0.1.0.0`.
 
 ### Added
 
@@ -53,3 +54,4 @@ Initial release. Supports Odoo 17.0 and 19.0 in parallel.
   (`clickbot`) UI regression pass.
 
 [1.0.0]: https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/releases/tag/v17.0.1.0.0
+[v19.0.1.0.0]: https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/releases/tag/v19.0.1.0.0
