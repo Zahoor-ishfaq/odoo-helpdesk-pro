@@ -61,6 +61,8 @@ a live **SLA Status** badge:
 Once a ticket reaches a closing stage, its SLA status and hours are
 frozen — they won't keep changing after the fact.
 
+![Ticket kanban board with live SLA badges](../static/description/screenshots/ticket_kanban_en.png)
+
 ## Working a ticket
 
 Open **Helpdesk ▸ Tickets**. A ticket has:
@@ -75,6 +77,8 @@ Open **Helpdesk ▸ Tickets**. A ticket has:
 Replying in the chatter sends an email to the customer; the customer
 can also reply directly from their own inbox, and their reply threads
 back into the same ticket.
+
+![Ticket form showing the matched SLA policy and deadline](../static/description/screenshots/ticket_form_en.png)
 
 ## Canned responses
 
@@ -92,6 +96,8 @@ attachments into the destination ticket, then closes the duplicate with
 a reference back to where it went. Both tickets must be open at the
 time of the merge.
 
+![Ticket merge wizard](../static/description/screenshots/merge_wizard_en.png)
+
 ## Customer satisfaction (CSAT) ratings
 
 If a team has **CSAT** enabled, closing one of its tickets sends the
@@ -100,6 +106,8 @@ customer an email with three one-click links: **Good**, **Okay**, or
 reused to change the rating later) and shows a thank-you page. Ratings
 roll up into each team's **CSAT** score on the Teams list and form.
 
+![CSAT rating request email](../static/description/screenshots/rating_email_en.png)
+
 ## The customer portal
 
 Customers with a portal account can see their own tickets under
@@ -107,6 +115,8 @@ Customers with a portal account can see their own tickets under
 into each ticket's full communication history. They only ever see
 their own tickets, enforced by record rules (not just a filtered
 view), so this is safe even for tech-savvy users probing the URL.
+
+![Customer portal home with the Tickets card](../static/description/screenshots/portal_home_en.png)
 
 ## Analytics
 
