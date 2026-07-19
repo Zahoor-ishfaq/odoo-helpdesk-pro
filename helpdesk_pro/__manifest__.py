@@ -25,6 +25,7 @@
         "views/helpdesk_team_views.xml",
         "views/helpdesk_sla_views.xml",
         "views/helpdesk_menus.xml",
+        "views/portal_templates.xml",
     ],
     "demo": [],
     "installable": True,

@@ -93,6 +93,11 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
     def _read_group_stage_ids(self, stages, _domain):
         return stages.search([])
 
+    def _compute_access_url(self):
+        super()._compute_access_url()
+        for ticket in self:
+            ticket.access_url = f"/my/ticket/{ticket.id}"
+
     @api.depends("team_id", "priority", "tag_ids")
     def _compute_sla_id(self):
         for ticket in self:
