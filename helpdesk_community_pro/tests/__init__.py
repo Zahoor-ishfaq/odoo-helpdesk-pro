@@ -1,4 +1,4 @@
-"""Test package for helpdesk_pro."""
+"""Test package for helpdesk_community_pro."""
 
 from . import test_analytics  # noqa: F401
 from . import test_canned_response  # noqa: F401

@@ -176,7 +176,7 @@ class TestHelpdeskMailGateway(MailCommon):
         self.assertFalse(ticket.stage_id.is_closed)
 
     @mute_logger(
-        "odoo.addons.helpdesk_pro.models.helpdesk_ticket",
+        "odoo.addons.helpdesk_community_pro.models.helpdesk_ticket",
         "odoo.addons.mail.models.mail_thread",
     )
     def test_message_new_malformed_mail_falls_back(self):

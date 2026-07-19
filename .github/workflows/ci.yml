@@ -39,7 +39,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - name: Install and test helpdesk_pro
+      - name: Install and test helpdesk_community_pro
         env:
           ODOO_IMAGE: odoo:${{ github.base_ref || github.ref_name }}
         run: |
@@ -47,7 +47,7 @@ jobs:
             --network host \
             --user root \
             -e HOST=localhost -e PORT=5432 -e USER=odoo -e PASSWORD=odoo \
-            -v ${{ github.workspace }}/helpdesk_pro:/mnt/extra-addons/helpdesk_pro \
+            -v ${{ github.workspace }}/helpdesk_community_pro:/mnt/extra-addons/helpdesk_community_pro \
             "$ODOO_IMAGE" \
             bash -c "
               apt-get update -qq &&
@@ -55,7 +55,7 @@ jobs:
               curl -sS -o /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &&
               apt-get install -y -qq /tmp/chrome.deb >/dev/null &&
               pip install -q --break-system-packages websocket-client &&
-              odoo -d ci_test -i helpdesk_pro --test-enable --test-tags /helpdesk_pro --stop-after-init \
+              odoo -d ci_test -i helpdesk_community_pro --test-enable --test-tags /helpdesk_community_pro --stop-after-init \
                 --max-cron-threads=0 \
                 --db_host=localhost --db_port=5432 --db_user=odoo --db_password=odoo
             "

@@ -126,7 +126,7 @@ class HelpdeskTeam(models.Model):  # pylint: disable=too-few-public-methods
         self.ensure_one()
         # pylint: disable=protected-access
         action = self.env["ir.actions.act_window"]._for_xml_id(
-            "helpdesk_pro.helpdesk_ticket_action"
+            "helpdesk_community_pro.helpdesk_ticket_action"
         )
         action["domain"] = [("team_id", "=", self.id)]
         action["context"] = {"default_team_id": self.id}

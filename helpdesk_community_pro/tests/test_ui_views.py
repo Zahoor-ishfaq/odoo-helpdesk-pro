@@ -23,11 +23,11 @@ class TestHelpdeskUiViews(odoo.tests.HttpCase):
     def setUpClass(cls):  # pylint: disable=invalid-name
         """Grant admin manager rights so the crawl can reach every menu."""
         super().setUpClass()
-        # A fresh admin has no helpdesk_pro group by default (same as any
+        # A fresh admin has no helpdesk_community_pro group by default (same as any
         # real install): grant manager rights so the crawl can actually
         # reach every menu, including the manager-gated Configuration one.
         cls.env.ref("base.user_admin").group_ids = [
-            (4, cls.env.ref("helpdesk_pro.group_helpdesk_manager").id)
+            (4, cls.env.ref("helpdesk_community_pro.group_helpdesk_manager").id)
         ]
 
     def test_click_everywhere_helpdesk(self):
@@ -35,7 +35,7 @@ class TestHelpdeskUiViews(odoo.tests.HttpCase):
         self.browser_js(
             "/odoo",
             "odoo.loader.modules.get('@web/webclient/clickbot/clickbot_loader')"
-            ".startClickEverywhere('helpdesk_pro.helpdesk_menu_root');",
+            ".startClickEverywhere('helpdesk_community_pro.helpdesk_menu_root');",
             "odoo.isReady === true",
             login="admin",
             timeout=180,

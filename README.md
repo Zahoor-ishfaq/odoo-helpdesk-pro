@@ -3,9 +3,9 @@
 [![CI](https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/actions/workflows/ci.yml/badge.svg?branch=17.0)](https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/actions/workflows/ci.yml)
 [![License: LGPL-3](https://img.shields.io/badge/license-LGPL--3-blue.svg)](LICENSE)
 [![Odoo](https://img.shields.io/badge/Odoo-17.0%20%7C%2019.0-714B67.svg)](https://www.odoo.com)
-[![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20AR-714B67.svg)](helpdesk_pro/i18n/ar.po)
+[![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20AR-714B67.svg)](helpdesk_community_pro/i18n/ar.po)
 
-![Helpdesk Pro](helpdesk_pro/static/description/banner.png)
+![Helpdesk Pro](helpdesk_community_pro/static/description/banner.png)
 
 A free, production-grade helpdesk module for Odoo Community: SLA
 tracking, a customer portal, CSAT ratings, canned responses, ticket
@@ -40,8 +40,8 @@ branch) in parallel.
   module; Arabic (`ar`) translation included alongside the English
   source strings.
 
-See the [user guide](helpdesk_pro/docs/user-guide.md) (also available
-[in Arabic](helpdesk_pro/docs/user-guide-ar.md)) for a full walkthrough.
+See the [user guide](helpdesk_community_pro/docs/user-guide.md) (also available
+[in Arabic](helpdesk_community_pro/docs/user-guide-ar.md)) for a full walkthrough.
 
 ## Screenshots
 
@@ -51,14 +51,14 @@ See the [user guide](helpdesk_pro/docs/user-guide.md) (also available
 
 **Ticket kanban** — live SLA badges, per-team queues
 
-![Ticket kanban board](helpdesk_pro/static/description/screenshots/ticket_kanban_en.png)
+![Ticket kanban board](helpdesk_community_pro/static/description/screenshots/ticket_kanban_en.png)
 
 </td>
 <td width="50%">
 
 **Ticket form** — matched SLA policy, deadline, and status
 
-![Ticket form](helpdesk_pro/static/description/screenshots/ticket_form_en.png)
+![Ticket form](helpdesk_community_pro/static/description/screenshots/ticket_form_en.png)
 
 </td>
 </tr>
@@ -67,14 +67,14 @@ See the [user guide](helpdesk_pro/docs/user-guide.md) (also available
 
 **Customer portal** — scoped to the logged-in customer's own tickets
 
-![Customer portal home](helpdesk_pro/static/description/screenshots/portal_home_en.png)
+![Customer portal home](helpdesk_community_pro/static/description/screenshots/portal_home_en.png)
 
 </td>
 <td width="50%">
 
 **Ticket analysis** — pivot/graph, sliceable by team, stage, priority
 
-![Analytics pivot view](helpdesk_pro/static/description/screenshots/analytics_pivot_en.png)
+![Analytics pivot view](helpdesk_community_pro/static/description/screenshots/analytics_pivot_en.png)
 
 </td>
 </tr>
@@ -82,12 +82,12 @@ See the [user guide](helpdesk_pro/docs/user-guide.md) (also available
 
 The full interface — including these same screens — is also available
 in Arabic; see the `_ar` screenshots under
-[`static/description/screenshots/`](helpdesk_pro/static/description/screenshots/)
-or the [Arabic user guide](helpdesk_pro/docs/user-guide-ar.md).
+[`static/description/screenshots/`](helpdesk_community_pro/static/description/screenshots/)
+or the [Arabic user guide](helpdesk_community_pro/docs/user-guide-ar.md).
 
 ## Install
 
-1. Copy (or clone) the `helpdesk_pro/` folder into your Odoo addons
+1. Copy (or clone) the `helpdesk_community_pro/` folder into your Odoo addons
    path.
 2. Restart Odoo and update the apps list.
 3. Install **Helpdesk Pro** from Apps.
@@ -108,8 +108,8 @@ docker compose -f docker-compose.19.yml up   # Odoo 19.0 → http://localhost:80
 Run the test suite inside a container:
 
 ```bash
-docker compose run --rm web odoo -d test17 -i helpdesk_pro \
-  --test-enable --test-tags /helpdesk_pro --stop-after-init
+docker compose run --rm web odoo -d test17 -i helpdesk_community_pro \
+  --test-enable --test-tags /helpdesk_community_pro --stop-after-init
 ```
 
 Lint before committing:

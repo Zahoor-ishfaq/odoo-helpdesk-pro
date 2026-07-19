@@ -61,7 +61,7 @@
     <record id="demo_ticket_login_issue" model="helpdesk.ticket">
         <field name="name">Cannot log into my account</field>
         <field name="team_id" ref="demo_team_support"/>
-        <field name="stage_id" ref="helpdesk_pro.stage_new"/>
+        <field name="stage_id" ref="helpdesk_community_pro.stage_new"/>
         <field name="priority">3</field>
         <field name="partner_id" ref="demo_partner_alice"/>
         <field name="description" type="html">
@@ -71,7 +71,7 @@
     <record id="demo_ticket_billing_question" model="helpdesk.ticket">
         <field name="name">Question about last invoice</field>
         <field name="team_id" ref="demo_team_support"/>
-        <field name="stage_id" ref="helpdesk_pro.stage_in_progress"/>
+        <field name="stage_id" ref="helpdesk_community_pro.stage_in_progress"/>
         <field name="priority">1</field>
         <field name="partner_id" ref="demo_partner_bruno"/>
         <field name="user_id" ref="base.user_admin"/>
@@ -83,7 +83,7 @@
     <record id="demo_ticket_feature_request" model="helpdesk.ticket">
         <field name="name">Add dark mode to the dashboard</field>
         <field name="team_id" ref="demo_team_technical"/>
-        <field name="stage_id" ref="helpdesk_pro.stage_on_hold"/>
+        <field name="stage_id" ref="helpdesk_community_pro.stage_on_hold"/>
         <field name="priority">0</field>
         <field name="partner_id" ref="demo_partner_chloe"/>
         <field name="description" type="html">
@@ -93,7 +93,7 @@
     <record id="demo_ticket_api_error" model="helpdesk.ticket">
         <field name="name">API returns 500 on bulk export</field>
         <field name="team_id" ref="demo_team_technical"/>
-        <field name="stage_id" ref="helpdesk_pro.stage_new"/>
+        <field name="stage_id" ref="helpdesk_community_pro.stage_new"/>
         <field name="priority">2</field>
         <field name="partner_id" ref="demo_partner_bruno"/>
         <field name="description" type="html">
@@ -103,7 +103,7 @@
     <record id="demo_ticket_password_reset" model="helpdesk.ticket">
         <field name="name">Password reset email never arrives</field>
         <field name="team_id" ref="demo_team_support"/>
-        <field name="stage_id" ref="helpdesk_pro.stage_solved"/>
+        <field name="stage_id" ref="helpdesk_community_pro.stage_solved"/>
         <field name="priority">1</field>
         <field name="partner_id" ref="demo_partner_alice"/>
         <field name="user_id" ref="base.user_admin"/>
@@ -118,7 +118,7 @@
     <record id="demo_ticket_export_slow" model="helpdesk.ticket">
         <field name="name">Report export is very slow</field>
         <field name="team_id" ref="demo_team_technical"/>
-        <field name="stage_id" ref="helpdesk_pro.stage_solved"/>
+        <field name="stage_id" ref="helpdesk_community_pro.stage_solved"/>
         <field name="priority">2</field>
         <field name="partner_id" ref="demo_partner_chloe"/>
         <field name="user_id" ref="base.user_admin"/>

@@ -1,4 +1,4 @@
-"""Model registration for helpdesk_pro."""
+"""Model registration for helpdesk_community_pro."""
 
 from . import helpdesk_canned_response  # noqa: F401
 from . import helpdesk_sla  # noqa: F401

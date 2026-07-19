@@ -80,7 +80,7 @@ class HelpdeskCustomerPortal(CustomerPortal):
                 "sortby": sortby,
             }
         )
-        return request.render("helpdesk_pro.portal_my_tickets", values)
+        return request.render("helpdesk_community_pro.portal_my_tickets", values)
 
     @http.route(["/my/ticket/<int:ticket_id>"], type="http", auth="user", website=True)
     def portal_ticket_detail(self, ticket_id, access_token=None, **kw):
@@ -100,4 +100,4 @@ class HelpdeskCustomerPortal(CustomerPortal):
             False,
             **kw,
         )
-        return request.render("helpdesk_pro.portal_ticket_page", values)
+        return request.render("helpdesk_community_pro.portal_ticket_page", values)

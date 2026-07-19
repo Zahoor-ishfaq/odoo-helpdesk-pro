@@ -361,7 +361,8 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         if not self.partner_email:
             return
         template = self.env.ref(
-            "helpdesk_pro.mail_template_ticket_received", raise_if_not_found=False
+            "helpdesk_community_pro.mail_template_ticket_received",
+            raise_if_not_found=False,
         )
         if template:
             template.send_mail(self.id, force_send=False)
@@ -413,7 +414,8 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         if not self.partner_email:
             return
         template = self.env.ref(
-            "helpdesk_pro.mail_template_ticket_rating", raise_if_not_found=False
+            "helpdesk_community_pro.mail_template_ticket_rating",
+            raise_if_not_found=False,
         )
         if template:
             template.send_mail(self.id, force_send=False)

@@ -7,12 +7,12 @@
             <form string="Ticket">
                 <header>
                     <button
-                        name="%(helpdesk_pro.helpdesk_canned_insert_action)d"
+                        name="%(helpdesk_community_pro.helpdesk_canned_insert_action)d"
                         type="action"
                         string="Insert Canned Response"
                     />
                     <button
-                        name="%(helpdesk_pro.helpdesk_ticket_merge_action)d"
+                        name="%(helpdesk_community_pro.helpdesk_ticket_merge_action)d"
                         type="action"
                         string="Merge"
                     />

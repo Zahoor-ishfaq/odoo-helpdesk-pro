@@ -73,7 +73,7 @@
                             <field name="active" invisible="1"/>
                         </group>
                     </group>
-                    <group string="Email Alias" groups="helpdesk_pro.group_helpdesk_manager">
+                    <group string="Email Alias" groups="helpdesk_community_pro.group_helpdesk_manager">
                         <div colspan="2">
                             <!-- alias_id must be in the view for alias_domain_id to default correctly -->
                             <field name="alias_id" invisible="1"/>
