@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- PORT-19: <tree> becomes <list> -->
     <record id="helpdesk_canned_response_view_list" model="ir.ui.view">
         <field name="name">helpdesk.canned.response.list</field>
         <field name="model">helpdesk.canned.response</field>
         <field name="arch" type="xml">
-            <tree string="Canned Responses">
+            <list string="Canned Responses">
                 <field name="name"/>
                 <field name="team_ids" widget="many2many_tags"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -32,7 +31,7 @@
     <record id="helpdesk_canned_response_action" model="ir.actions.act_window">
         <field name="name">Canned Responses</field>
         <field name="res_model">helpdesk.canned.response</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first canned response
