@@ -1,4 +1,4 @@
-"""Shared fixtures for helpdesk_pro tests."""
+"""Shared fixtures for helpdesk_community_pro tests."""
 
 
 def make_mon_fri_calendar(env, name="Mon-Fri 9-17"):

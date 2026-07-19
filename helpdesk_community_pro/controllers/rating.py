@@ -35,16 +35,16 @@ class HelpdeskRating(http.Controller):  # pylint: disable=too-few-public-methods
             or not ticket._rating_token_is_valid(token)
         ):
             return request.render(
-                "helpdesk_pro.rating_feedback_page", {"state": "invalid"}
+                "helpdesk_community_pro.rating_feedback_page", {"state": "invalid"}
             )
 
         if not ticket._apply_rating(rating):
             return request.render(
-                "helpdesk_pro.rating_feedback_page",
+                "helpdesk_community_pro.rating_feedback_page",
                 {"state": "locked", "ticket": ticket},
             )
 
         return request.render(
-            "helpdesk_pro.rating_feedback_page",
+            "helpdesk_community_pro.rating_feedback_page",
             {"state": "thanks", "ticket": ticket, "rating_label": rating.capitalize()},
         )

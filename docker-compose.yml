@@ -4,7 +4,7 @@ services:
     depends_on: [db]
     ports: ["8069:8069"]
     volumes:
-      - ./helpdesk_pro:/mnt/extra-addons/helpdesk_pro
+      - ./helpdesk_community_pro:/mnt/extra-addons/helpdesk_community_pro
       - odoo17-web:/var/lib/odoo
     command: odoo --dev=all
   db:
