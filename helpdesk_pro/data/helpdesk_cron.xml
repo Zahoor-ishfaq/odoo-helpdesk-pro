@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- These crons are immediately eligible to run once loaded (default
+     nextcall). In test runs with demo data installed, a live cron worker
+     thread can race an HttpCase request's session validation, since
+     committed demo records (unlike a TransactionCase's own rolled back
+     test data) are visible to that separate thread, surfacing as a
+     spurious "Session expired". Fix is at the test invocation, not here:
+     run with max-cron-threads set to 0 (see .github/workflows/ci.yml). -->
 <odoo>
     <record id="ir_cron_helpdesk_sla_status" model="ir.cron">
         <field name="name">Helpdesk: Update SLA Status</field>
