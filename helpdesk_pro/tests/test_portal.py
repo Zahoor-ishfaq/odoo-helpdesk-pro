@@ -3,7 +3,7 @@
 # pylint: disable=import-error
 # odoo is not installed in the isolated pylint-odoo pre-commit environment.
 from odoo.tests import tagged
-from odoo.tests.common import HttpCase, new_test_user
+from odoo.tests.common import HttpCase, JsonRpcException, new_test_user
 
 
 @tagged("post_install", "-at_install")
@@ -58,3 +58,59 @@ class TestHelpdeskPortal(HttpCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.own_ticket.name.encode(), response.content)
         self.assertNotIn(b"Not mine", response.content)
+
+    def test_portal_user_can_reply_to_own_ticket(self):
+        """A portal user can post a reply on their own ticket via the chatter.
+
+        helpdesk.ticket grants portal users perm_write=0 (read-only) in
+        ir.model.access.csv, and mail.thread's default _mail_post_access
+        is "write" -- without this model explicitly overriding it to
+        "read", the portal composer would silently fail on every reply
+        even though the ticket detail page itself renders fine. Exercises
+        the real /mail/message/post route the portal chatter widget
+        calls, not a direct ORM message_post() (which would bypass this
+        exact access check).
+        """
+        self.authenticate("portal_customer", "portal_customer")
+        message_count_before = len(self.own_ticket.message_ids)
+        # A successful call is the check that matters: an access failure
+        # raises JsonRpcException (see the stranger test below), so simply
+        # not raising already proves the fix. The response's own shape
+        # differs 17.0 vs 19.0 (bare message dict vs a message_id/store_data
+        # wrapper), so avoid asserting on it and instead confirm the
+        # message actually landed on the ticket.
+        self.make_jsonrpc_request(
+            "/mail/message/post",
+            {
+                "thread_model": "helpdesk.ticket",
+                "thread_id": self.own_ticket.id,
+                "post_data": {"body": "Any update on this?"},
+            },
+        )
+        self.own_ticket.invalidate_recordset(["message_ids"])
+        self.assertEqual(len(self.own_ticket.message_ids), message_count_before + 1)
+        self.assertTrue(
+            any(
+                "Any update on this?" in (body or "")
+                for body in self.own_ticket.message_ids.mapped("body")
+            )
+        )
+
+    def test_portal_stranger_cannot_reply_to_others_ticket(self):
+        """A portal user cannot post on a ticket that isn't theirs.
+
+        The read-access ir.rule (helpdesk_ticket_rule_portal) already
+        scopes which tickets a portal user can even find; this confirms
+        relaxing _mail_post_access to "read" for replies didn't also
+        relax who can reach the thread in the first place.
+        """
+        self.authenticate("portal_stranger", "portal_stranger")
+        with self.assertRaises(JsonRpcException):
+            self.make_jsonrpc_request(
+                "/mail/message/post",
+                {
+                    "thread_model": "helpdesk.ticket",
+                    "thread_id": self.own_ticket.id,
+                    "post_data": {"body": "Sneaky reply"},
+                },
+            )
