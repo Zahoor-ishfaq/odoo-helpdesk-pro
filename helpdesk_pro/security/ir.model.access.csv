@@ -11,3 +11,7 @@ access_helpdesk_sla_user,helpdesk.sla.user,model_helpdesk_sla,group_helpdesk_use
 access_helpdesk_sla_manager,helpdesk.sla.manager,model_helpdesk_sla,group_helpdesk_manager,1,1,1,1
 access_helpdesk_ticket_portal,helpdesk.ticket.portal,model_helpdesk_ticket,base.group_portal,1,0,0,0
 access_helpdesk_stage_portal,helpdesk.stage.portal,model_helpdesk_stage,base.group_portal,1,0,0,0
+access_helpdesk_canned_response_user,helpdesk.canned.response.user,model_helpdesk_canned_response,group_helpdesk_user,1,0,0,0
+access_helpdesk_canned_response_manager,helpdesk.canned.response.manager,model_helpdesk_canned_response,group_helpdesk_manager,1,1,1,1
+access_helpdesk_canned_insert_user,helpdesk.canned.insert.user,model_helpdesk_canned_insert,group_helpdesk_user,1,1,1,1
+access_helpdesk_ticket_merge_user,helpdesk.ticket.merge.user,model_helpdesk_ticket_merge,group_helpdesk_user,1,1,1,1
