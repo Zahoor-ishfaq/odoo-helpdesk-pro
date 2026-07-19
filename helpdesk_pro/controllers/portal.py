@@ -21,15 +21,15 @@ from odoo.http import request
 
 
 class HelpdeskCustomerPortal(CustomerPortal):
-    """"My Tickets" portal pages: list, detail, and reply via chatter."""
+    """ "My Tickets" portal pages: list, detail, and reply via chatter."""
 
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
         if "ticket_count" in counters:
-            Ticket = request.env["helpdesk.ticket"]
+            ticket_model = request.env["helpdesk.ticket"]
             values["ticket_count"] = (
-                Ticket.search_count([])
-                if Ticket.check_access_rights("read", raise_exception=False)
+                ticket_model.search_count([])
+                if ticket_model.check_access_rights("read", raise_exception=False)
                 else 0
             )
         return values
@@ -47,16 +47,19 @@ class HelpdeskCustomerPortal(CustomerPortal):
         website=True,
     )
     def portal_my_tickets(self, page=1, sortby=None, **kw):
+        # pylint: disable=unused-argument
+        # **kw absorbs stray query-string params (e.g. from pager links)
+        # so an unexpected one doesn't turn into a TypeError on this route.
         """List the current portal user's own tickets (ir.rule-filtered)."""
         values = self._prepare_portal_layout_values()
-        Ticket = request.env["helpdesk.ticket"]
+        ticket_model = request.env["helpdesk.ticket"]
 
         searchbar_sortings = self._ticket_get_searchbar_sortings()
         if not sortby:
             sortby = "date"
         order = searchbar_sortings[sortby]["order"]
 
-        ticket_count = Ticket.search_count([])
+        ticket_count = ticket_model.search_count([])
         pager = portal_pager(
             url="/my/tickets",
             url_args={"sortby": sortby},
@@ -64,7 +67,7 @@ class HelpdeskCustomerPortal(CustomerPortal):
             page=page,
             step=self._items_per_page,
         )
-        tickets = Ticket.search(
+        tickets = ticket_model.search(
             [], order=order, limit=self._items_per_page, offset=pager["offset"]
         )
         values.update(
@@ -79,9 +82,7 @@ class HelpdeskCustomerPortal(CustomerPortal):
         )
         return request.render("helpdesk_pro.portal_my_tickets", values)
 
-    @http.route(
-        ["/my/ticket/<int:ticket_id>"], type="http", auth="user", website=True
-    )
+    @http.route(["/my/ticket/<int:ticket_id>"], type="http", auth="user", website=True)
     def portal_ticket_detail(self, ticket_id, access_token=None, **kw):
         """A single ticket, with its status and chatter for replies."""
         try:
