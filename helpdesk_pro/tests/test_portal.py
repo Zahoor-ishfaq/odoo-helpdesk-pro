@@ -114,3 +114,18 @@ class TestHelpdeskPortal(HttpCase):
                     "post_data": {"body": "Sneaky reply"},
                 },
             )
+
+    def test_assignee_field_excludes_portal_users(self):
+        """The "Assigned to" field must not offer portal/customer users.
+
+        helpdesk.ticket.user_id had no domain restricting it to internal
+        users, so a customer given portal access (base.group_portal)
+        showed up in the "Assigned to" picker as if they were an agent
+        -- found live, with a real portal customer appearing in that
+        dropdown. Matches the domain already used on
+        helpdesk.team.member_ids for the same reason.
+        """
+        domain = self.env["helpdesk.ticket"]._fields["user_id"].domain
+        matching_users = self.env["res.users"].search(domain)
+        self.assertNotIn(self.portal_user, matching_users)
+        self.assertIn(self.env.ref("base.user_admin"), matching_users)
