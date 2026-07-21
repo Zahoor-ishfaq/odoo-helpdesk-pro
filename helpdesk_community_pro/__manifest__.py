@@ -13,6 +13,7 @@
     "license": "LGPL-3",
     "depends": ["mail", "portal", "resource"],
     "images": [
+        "static/description/thumbnail.png",
         "static/description/banner.png",
         "static/description/screenshots/ticket_kanban_en.png",
         "static/description/screenshots/ticket_form_en.png",
