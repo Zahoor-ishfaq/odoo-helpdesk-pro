@@ -5,7 +5,7 @@
 [![Odoo](https://img.shields.io/badge/Odoo-17.0%20%7C%2019.0-714B67.svg)](https://www.odoo.com)
 [![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20AR-714B67.svg)](helpdesk_community_pro/i18n/ar.po)
 
-![Helpdesk Pro](helpdesk_community_pro/static/description/banner.png)
+![Helpdesk Pro](helpdesk_community_pro/static/description/thumbnail.png)
 
 A free, production-grade helpdesk module for Odoo Community: SLA
 tracking, a customer portal, CSAT ratings, canned responses, ticket
