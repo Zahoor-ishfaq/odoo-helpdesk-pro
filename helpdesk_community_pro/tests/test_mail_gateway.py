@@ -165,6 +165,7 @@ class TestHelpdeskMailGateway(MailCommon):
             [("is_closed", "=", True)], limit=1
         )
         ticket.stage_id = closed_stage
+        self.assertTrue(ticket.close_date)
         self.format_and_process(
             EMAIL_TPL,
             to=self._alias_email(),
@@ -175,6 +176,7 @@ class TestHelpdeskMailGateway(MailCommon):
             msg_id="<reply-reopen-test@example.com>",
         )
         self.assertFalse(ticket.stage_id.is_closed)
+        self.assertFalse(ticket.close_date, "a reopened ticket isn't closed")
 
     @mute_logger(
         "odoo.addons.helpdesk_community_pro.models.helpdesk_ticket",

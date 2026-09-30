@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 # pylint: disable=import-error
 # odoo is not installed in the isolated pylint-odoo pre-commit environment.
+from freezegun import freeze_time
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
@@ -217,3 +218,80 @@ class TestHelpdeskSla(TransactionCase):
         (bad_ticket | good_ticket)._compute_sla_status()
         self.assertFalse(bad_ticket.sla_status)
         self.assertEqual(good_ticket.sla_status, "breached")
+
+    def _reopen_stage(self):
+        return self.env["helpdesk.stage"].search(
+            [("is_closed", "=", False)], order="sequence", limit=1
+        )
+
+    def test_reopen_clears_close_data_and_refreshes_status(self):
+        """Reopening clears close_date/sla_reached and recomputes the SLA
+        status immediately, without waiting for the cron."""
+        self.env["helpdesk.sla"].create(
+            {"name": "Reopen SLA", "team_id": self.team.id, "target_hours": 8}
+        )
+        ticket = self.env["helpdesk.ticket"].create(
+            {"name": "Reopen me", "team_id": self.team.id}
+        )
+        ticket.stage_id = self.closed_stage
+        self.assertTrue(ticket.close_date)
+        self.assertTrue(ticket.sla_reached)
+        self.assertEqual(ticket.sla_status, "ok")
+
+        # Backdate creation so the (create_date-anchored) deadline has long
+        # passed by the time the ticket is reopened.
+        self.env.cr.execute(
+            "UPDATE helpdesk_ticket SET create_date = %s WHERE id = %s",
+            (datetime(2024, 1, 4, 9, 0, 0), ticket.id),
+        )
+        ticket.invalidate_recordset(["create_date"])
+
+        ticket.stage_id = self._reopen_stage()
+        self.assertFalse(ticket.close_date)
+        self.assertFalse(ticket.sla_reached)
+        self.assertEqual(ticket.resolution_hours, 0.0)
+        self.assertEqual(ticket.sla_deadline, datetime(2024, 1, 4, 17, 0, 0))
+        self.assertEqual(ticket.sla_status, "breached")
+        self.assertGreater(ticket.open_hours, 8)
+
+    def test_reclose_uses_original_deadline(self):
+        """Close -> reopen -> close: close_date is the second close, and
+        sla_reached is judged against the original deadline, not a fresh
+        one granted by the reopen."""
+        self.env["helpdesk.sla"].create(
+            {"name": "Reclose SLA", "team_id": self.team.id, "target_hours": 8}
+        )
+        ticket = self.env["helpdesk.ticket"].create(
+            {"name": "Reclose me", "team_id": self.team.id}
+        )
+        deadline = ticket.sla_deadline
+        ticket.stage_id = self.closed_stage
+        self.assertTrue(ticket.sla_reached)
+
+        ticket.stage_id = self._reopen_stage()
+        self.assertEqual(ticket.sla_deadline, deadline)
+
+        second_close = (deadline + timedelta(days=3)).replace(microsecond=0)
+        with freeze_time(second_close):
+            ticket.stage_id = self.closed_stage
+        self.assertEqual(ticket.close_date, second_close)
+        self.assertEqual(ticket.sla_deadline, deadline)
+        self.assertFalse(ticket.sla_reached)
+
+    def test_team_stats_ignore_reopened_ticket(self):
+        """A reopened ticket no longer counts as closed in team analytics."""
+        self.env["helpdesk.sla"].create(
+            {"name": "Stats SLA", "team_id": self.team.id, "target_hours": 40}
+        )
+        ticket = self.env["helpdesk.ticket"].create(
+            {"name": "Stats", "team_id": self.team.id}
+        )
+        ticket.stage_id = self.closed_stage
+        self.team.invalidate_recordset(["sla_compliance"])
+        self.assertEqual(self.team.sla_compliance, 100.0)
+
+        ticket.stage_id = self._reopen_stage()
+        ticket.flush_recordset()
+        self.team.invalidate_recordset(["sla_compliance", "avg_resolution_hours"])
+        self.assertEqual(self.team.sla_compliance, 0.0)
+        self.assertEqual(self.team.avg_resolution_hours, 0.0)
