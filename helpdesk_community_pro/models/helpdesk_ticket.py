@@ -118,7 +118,9 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         copy=False, help="Set the first time the ticket is assigned to an agent."
     )
     close_date = fields.Datetime(
-        copy=False, help="Set the first time the ticket enters a closed stage."
+        copy=False,
+        help="Set each time the ticket enters a closed stage; cleared when it "
+        "is reopened.",
     )
     open_hours = fields.Float(
         compute="_compute_open_hours",
@@ -282,13 +284,18 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         return tickets
 
     def write(self, vals):
-        """Set sla_reached/close_date/CSAT request on the transition into a
-        closed stage, and assign_date on first assignment.
+        """Set sla_reached/close_date/CSAT request on each transition into a
+        closed stage, clear them again on a transition back out of one
+        (reopen), and set assign_date on first assignment.
 
         sla_deadline/sla_status are frozen simply by not depending on
         stage_id -- this write is only about capturing point-in-time facts
         (transitions) that a depends-based compute can't see, it only sees
         resulting states.
+
+        A reopen doesn't grant a fresh SLA: the deadline stays anchored to
+        create_date, since the customer's original request is still the one
+        waiting. A re-close then evaluates sla_reached against it again.
 
         Also posts the new stage's mail_template_id (if any) into the
         chatter of every ticket whose stage actually changes.
@@ -302,12 +309,15 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         should hear about.
         """
         newly_closing = self.browse()
+        newly_reopening = self.browse()
         stage_changing = self.browse()
         if vals.get("stage_id"):
             new_stage = self.env["helpdesk.stage"].browse(vals["stage_id"])
             stage_changing = self.filtered(lambda t: t.stage_id != new_stage)
             if new_stage.is_closed:
                 newly_closing = self.filtered(lambda t: not t.stage_id.is_closed)
+            else:
+                newly_reopening = self.filtered(lambda t: t.stage_id.is_closed)
 
         newly_assigned = self.browse()
         if vals.get("user_id"):
@@ -319,6 +329,22 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
 
         if newly_assigned:
             newly_assigned.assign_date = fields.Datetime.now()
+
+        if newly_reopening:
+            # resolution_hours follows close_date back to 0 on its own.
+            newly_reopening.write({"close_date": False, "sla_reached": False})
+            # The SLA fields were frozen while closed and none of them
+            # depends on stage_id, so nothing would recompute them until
+            # the next cron pass -- until then the ticket would show its
+            # stale at-close status. Call the computes directly, exactly as
+            # the crons do: the stage is open again by now (super().write()
+            # above), so the freeze guards let them through, and nothing is
+            # left pending for a later flush to freeze at the wrong value
+            # (see the comment in create()).
+            # pylint: disable=protected-access
+            newly_reopening._compute_sla_deadline()
+            newly_reopening._compute_sla_status()
+            newly_reopening._compute_open_hours()
 
         # Before the CSAT email below, so a customer whose ticket closes
         # into a stage with a template reads "resolved" before "rate us".
