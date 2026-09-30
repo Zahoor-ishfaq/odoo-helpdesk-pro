@@ -27,7 +27,7 @@ and customers.
 | **Team** | A support queue (e.g. "Customer Support") with its own members, working calendar, and email alias. |
 | **Stage** | A pipeline step a ticket moves through (New → In Progress → On Hold → Solved). Any stage can be marked as a *closing* stage. |
 | **SLA Policy** | A target resolution time (in working hours) matched to a ticket by team, priority, and tag. |
-| **Rating** | A one-click customer satisfaction score (Good / Okay / Bad) collected after a ticket closes. |
+| **Rating** | A customer satisfaction score (Good / Okay / Bad) collected after a ticket closes. |
 
 ## Setting up a team
 
@@ -101,10 +101,15 @@ time of the merge.
 ## Customer satisfaction (CSAT) ratings
 
 If a team has **CSAT** enabled, closing one of its tickets sends the
-customer an email with three one-click links: **Good**, **Okay**, or
-**Bad**. Clicking a link records the rating (once — the link can't be
-reused to change the rating later) and shows a thank-you page. Ratings
-roll up into each team's **CSAT** score on the Teams list and form.
+customer an email with three links: **Good**, **Okay**, or **Bad**.
+Clicking a link opens a short confirmation page; the rating is only
+recorded once the customer presses **Submit** there, and a thank-you
+page follows. The confirmation step stops email security scanners,
+which open every link in a message, from recording a rating the
+customer never gave. The links are signed per ticket: the customer can
+come back and change their rating for 7 days after first rating, after
+which it is locked. Ratings roll up into each team's **CSAT** score on
+the Teams list and form.
 
 ![CSAT rating request email](../static/description/screenshots/rating_email_en.png)
 
