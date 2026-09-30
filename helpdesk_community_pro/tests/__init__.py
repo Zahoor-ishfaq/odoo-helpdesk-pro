@@ -8,4 +8,5 @@ from . import test_portal  # noqa: F401
 from . import test_rating  # noqa: F401
 from . import test_sla  # noqa: F401
 from . import test_stage_email  # noqa: F401
+from . import test_team_stages  # noqa: F401
 from . import test_ui_views  # noqa: F401

@@ -53,8 +53,11 @@ class HelpdeskTicketMerge(models.TransientModel):
             [("res_model", "=", "helpdesk.ticket"), ("res_id", "=", source.id)]
         ).write({"res_id": destination.id})
 
-        closed_stage = self.env["helpdesk.stage"].search(
-            [("is_closed", "=", True)], order="sequence", limit=1
+        # The source team's own closing stage: another team's would be
+        # rejected by helpdesk.ticket._check_stage_team.
+        # pylint: disable=protected-access
+        closed_stage = self.env["helpdesk.stage"]._get_team_first_stage(
+            source.team_id, is_closed=True
         )
         destination.message_post(
             body=_("Merged ticket %(ref)s into this one.", ref=source.ref)
