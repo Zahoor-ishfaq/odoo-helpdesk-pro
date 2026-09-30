@@ -160,9 +160,25 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
                 ticket.sla_deadline = False
                 continue
             start = ticket.create_date or fields.Datetime.now()
-            ticket.sla_deadline = ticket.team_id.calendar_id.plan_hours(
+            calendar = ticket.team_id.calendar_id
+            deadline = calendar.plan_hours(
                 ticket.sla_id.target_hours, start, compute_leaves=True
             )
+            if not deadline:
+                # plan_hours() returns False when the calendar can't fit the
+                # hours at all (e.g. no attendances). That's a configuration
+                # problem for the admin, not a reason to fail ticket
+                # creation or the SLA cron -- leave the ticket without a
+                # deadline and say why.
+                _logger.warning(
+                    "helpdesk: SLA policy %r matched ticket %s but calendar "
+                    "%r of team %r yields no deadline; check its working hours",
+                    ticket.sla_id.name,
+                    ticket.id,
+                    calendar.name,
+                    ticket.team_id.name,
+                )
+            ticket.sla_deadline = deadline or False
 
     @api.depends("sla_deadline", "sla_id.target_hours")
     def _compute_sla_status(self):
@@ -171,7 +187,9 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
             if ticket.stage_id.is_closed:
                 ticket.sla_status = ticket.sla_status  # frozen, no-op
                 continue
-            if not ticket.sla_id:
+            # No deadline despite a policy: the calendar couldn't place one
+            # (see _compute_sla_deadline) -- no status rather than a crash.
+            if not ticket.sla_id or not ticket.sla_deadline:
                 ticket.sla_status = False
                 continue
             remaining = (ticket.sla_deadline - now).total_seconds()
@@ -307,7 +325,7 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         if newly_closing:
             now = fields.Datetime.now()
             for ticket in newly_closing:
-                if ticket.sla_id:
+                if ticket.sla_id and ticket.sla_deadline:
                     ticket.sla_reached = now <= ticket.sla_deadline
                 ticket.close_date = now
                 if ticket.team_id.csat_enabled and not self.env.context.get(

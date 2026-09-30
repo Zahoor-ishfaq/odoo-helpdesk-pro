@@ -159,3 +159,61 @@ class TestHelpdeskSla(TransactionCase):
         self.assertEqual(
             ticket.sla_deadline, deadline_before, "deadline must stay frozen"
         )
+
+    def _make_no_deadline_ticket(self):
+        """A ticket whose SLA policy matches, on a calendar with no working
+        hours at all -- plan_hours() can't place a deadline and returns
+        False."""
+        calendar = self.env["resource.calendar"].create(
+            {"name": "No attendances", "tz": "UTC"}
+        )
+        calendar.attendance_ids.unlink()
+        team = self.env["helpdesk.team"].create(
+            {"name": "Empty Calendar Team", "calendar_id": calendar.id}
+        )
+        self.env["helpdesk.sla"].create(
+            {"name": "Unplaceable SLA", "team_id": team.id, "target_hours": 8}
+        )
+        with self.assertLogs(
+            "odoo.addons.helpdesk_community_pro.models.helpdesk_ticket", "WARNING"
+        ):
+            return self.env["helpdesk.ticket"].create(
+                {"name": "No deadline", "team_id": team.id}
+            )
+
+    def test_no_deadline_ticket_creates_without_status(self):
+        """A matched policy with no placeable deadline doesn't crash create."""
+        ticket = self._make_no_deadline_ticket()
+        self.assertTrue(ticket.sla_id)
+        self.assertFalse(ticket.sla_deadline)
+        self.assertFalse(ticket.sla_status)
+
+    def test_no_deadline_ticket_closes(self):
+        """Closing a ticket with no deadline doesn't crash either."""
+        ticket = self._make_no_deadline_ticket()
+        ticket.stage_id = self.closed_stage
+        self.assertFalse(ticket.sla_reached)
+        self.assertTrue(ticket.close_date)
+
+    def test_cron_survives_no_deadline_ticket(self):
+        """One ticket without a deadline doesn't abort the status refresh
+        for the rest of the batch."""
+        bad_ticket = self._make_no_deadline_ticket()
+        self.env["helpdesk.sla"].create(
+            {"name": "Normal SLA", "team_id": self.team.id, "target_hours": 40}
+        )
+        good_ticket = self.env["helpdesk.ticket"].create(
+            {"name": "Normal", "team_id": self.team.id}
+        )
+        past = datetime.now() - timedelta(hours=1)
+        self.env.cr.execute(
+            "UPDATE helpdesk_ticket SET sla_deadline = %s WHERE id = %s",
+            (past, good_ticket.id),
+        )
+        good_ticket.invalidate_recordset(["sla_deadline"])
+
+        # pylint: disable=protected-access
+        self.env["helpdesk.ticket"]._cron_update_sla_status()
+        (bad_ticket | good_ticket)._compute_sla_status()
+        self.assertFalse(bad_ticket.sla_status)
+        self.assertEqual(good_ticket.sla_status, "breached")
