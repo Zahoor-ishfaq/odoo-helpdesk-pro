@@ -24,9 +24,10 @@ branch) in parallel.
 - **Customer portal** — customers see only their own tickets, enforced
   by record rules (not a filtered view), with full communication
   history.
-- **CSAT ratings** — one-click Good / Okay / Bad rating links emailed
-  automatically when a ticket closes, secured with a signed,
-  single-use token.
+- **CSAT ratings** — Good / Okay / Bad rating links emailed
+  automatically when a ticket closes, secured with a signed per-ticket
+  link; the customer confirms their choice and can change it for 7
+  days.
 - **Canned responses** — reusable reply snippets, optionally scoped to
   a team, inserted into a ticket in one click.
 - **Ticket merging** — fold a duplicate ticket's messages, followers,
