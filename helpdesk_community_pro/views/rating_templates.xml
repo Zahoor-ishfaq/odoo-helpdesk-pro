@@ -34,6 +34,16 @@
                     .o_rating_card p {
                         color: #666;
                     }
+                    .o_rating_submit {
+                        background: #875a7b;
+                        color: #fff;
+                        border: 0;
+                        border-radius: 4px;
+                        padding: 0.6rem 1.6rem;
+                        font-size: 1rem;
+                        cursor: pointer;
+                        margin-top: 1rem;
+                    }
                     .o_rating_brand {
                         color: #875a7b;
                         font-weight: bold;
@@ -44,7 +54,24 @@
             </head>
             <body>
                 <div class="o_rating_card">
-                    <t t-if="state == 'thanks'">
+                    <!-- The email links land here (GET) and write nothing:
+                         mail scanners fetch every link, so only this form's
+                         POST records the rating (see controllers/rating.py). -->
+                    <t t-if="state == 'confirm'">
+                        <h1>Confirm your rating</h1>
+                        <p>
+                            You are about to rate ticket <t t-esc="ticket.ref"/>
+                            as "<t t-esc="rating_label"/>".
+                        </p>
+                        <form
+                            method="post"
+                            t-attf-action="/helpdesk/rate/#{ticket.id}/#{token}/submit"
+                        >
+                            <input type="hidden" name="rating" t-att-value="rating"/>
+                            <button type="submit" class="o_rating_submit">Submit</button>
+                        </form>
+                    </t>
+                    <t t-elif="state == 'thanks'">
                         <h1>Thank you for your feedback!</h1>
                         <p>
                             You rated ticket <t t-esc="ticket.ref"/> as

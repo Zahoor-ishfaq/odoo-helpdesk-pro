@@ -383,25 +383,34 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         self.ensure_one()
         return bool(token) and consteq(token, self._get_rating_token())
 
-    def _apply_rating(self, rating):
-        """Record a customer's CSAT click; returns False if the window has
-        closed.
+    def _rating_is_locked(self):
+        """Whether the RATING_WINDOW_DAYS update window has closed.
 
-        First click sets rating + rating_date. Further clicks update the
-        rating value as long as they land within RATING_WINDOW_DAYS of that
+        Read-only on purpose: the public GET confirmation page needs to show
+        the "locked" state without writing anything, and _apply_rating()
+        reuses it so the window rule lives in exactly one place.
+        """
+        self.ensure_one()
+        return bool(self.rating_date) and fields.Datetime.now() > (
+            self.rating_date + timedelta(days=RATING_WINDOW_DAYS)
+        )
+
+    def _apply_rating(self, rating):
+        """Record a customer's confirmed CSAT choice; returns False if the
+        window has closed.
+
+        First rating sets rating + rating_date. Further ratings update the
+        value as long as they land within RATING_WINDOW_DAYS of that
         *first* rating_date (rating_date itself never moves, so the window
-        doesn't reset/slide with each click) -- past it, the rating is
+        doesn't reset/slide with each change) -- past it, the rating is
         locked and this returns False without writing anything.
         """
         self.ensure_one()
-        now = fields.Datetime.now()
-        if self.rating_date and now > self.rating_date + timedelta(
-            days=RATING_WINDOW_DAYS
-        ):
+        if self._rating_is_locked():
             return False
         vals = {"rating": rating}
         if not self.rating_date:
-            vals["rating_date"] = now
+            vals["rating_date"] = fields.Datetime.now()
         self.write(vals)
         return True
 
