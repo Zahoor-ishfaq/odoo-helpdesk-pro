@@ -272,13 +272,22 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         (transitions) that a depends-based compute can't see, it only sees
         resulting states.
 
+        Also posts the new stage's mail_template_id (if any) into the
+        chatter of every ticket whose stage actually changes.
+
         context key `skip_csat_email`: used by the merge wizard when it
         closes the source ticket -- that closure isn't a real resolution,
         so it shouldn't survey the customer.
+
+        context key `skip_stage_email`: same idea for the stage template --
+        the merge wizard's close isn't a stage transition the customer
+        should hear about.
         """
         newly_closing = self.browse()
+        stage_changing = self.browse()
         if vals.get("stage_id"):
             new_stage = self.env["helpdesk.stage"].browse(vals["stage_id"])
+            stage_changing = self.filtered(lambda t: t.stage_id != new_stage)
             if new_stage.is_closed:
                 newly_closing = self.filtered(lambda t: not t.stage_id.is_closed)
 
@@ -292,6 +301,11 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
 
         if newly_assigned:
             newly_assigned.assign_date = fields.Datetime.now()
+
+        # Before the CSAT email below, so a customer whose ticket closes
+        # into a stage with a template reads "resolved" before "rate us".
+        if stage_changing and not self.env.context.get("skip_stage_email"):
+            stage_changing._send_stage_email()  # pylint: disable=protected-access
 
         if newly_closing:
             now = fields.Datetime.now()
@@ -366,6 +380,20 @@ class HelpdeskTicket(models.Model):  # pylint: disable=too-few-public-methods
         )
         if template:
             template.send_mail(self.id, force_send=False)
+
+    def _send_stage_email(self):
+        """Post each ticket's (new) stage template into its chatter.
+
+        message_post_with_source rather than template.send_mail: the email
+        then shows up in the ticket's history like any other reply, instead
+        of leaving no trace on the ticket. Tickets with nobody to write to
+        are skipped rather than posting a message that reaches no one.
+        """
+        for ticket in self:
+            template = ticket.stage_id.mail_template_id
+            if not template or not (ticket.partner_id or ticket.partner_email):
+                continue
+            ticket.message_post_with_source(template, subtype_xmlid="mail.mt_comment")
 
     def _get_rating_token(self):
         """Deterministic signature for this ticket's public rating links.
