@@ -27,5 +27,6 @@ class HelpdeskStage(models.Model):  # pylint: disable=too-few-public-methods
         "mail.template",
         string="Email Template",
         help="Email automatically sent to the customer when a ticket "
-        "enters this stage.",
+        "moves into this stage from another one. Tickets created directly "
+        "in this stage don't receive it.",
     )

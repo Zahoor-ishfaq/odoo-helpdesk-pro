@@ -60,8 +60,11 @@ class HelpdeskTicketMerge(models.TransientModel):
             body=_("Merged ticket %(ref)s into this one.", ref=source.ref)
         )
         # Closing here isn't a real resolution, so it shouldn't trigger a
-        # CSAT survey for the customer (see helpdesk.ticket.write()).
-        source.with_context(skip_csat_email=True).write({"stage_id": closed_stage.id})
+        # CSAT survey or the stage's email for the customer (see
+        # helpdesk.ticket.write()).
+        source.with_context(skip_csat_email=True, skip_stage_email=True).write(
+            {"stage_id": closed_stage.id}
+        )
         source.message_post(body=_("Merged into %(ref)s.", ref=destination.ref))
 
         return {
