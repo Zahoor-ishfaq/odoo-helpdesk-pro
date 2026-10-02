@@ -21,6 +21,12 @@
         <field name="name">Technical Support</field>
         <field name="member_ids" eval="[(4, ref('base.user_admin'))]"/>
     </record>
+    <!-- Shows per-team stages: only Technical Support's pipeline has it. -->
+    <record id="demo_stage_waiting_vendor" model="helpdesk.stage">
+        <field name="name">Waiting on Vendor</field>
+        <field name="sequence">35</field>
+        <field name="team_ids" eval="[(6, 0, [ref('demo_team_technical')])]"/>
+    </record>
 
     <record id="demo_sla_support_default" model="helpdesk.sla">
         <field name="name">Standard Support (24h)</field>

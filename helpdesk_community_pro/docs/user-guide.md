@@ -9,6 +9,7 @@ and customers.
 
 - [Concepts](#concepts)
 - [Setting up a team](#setting-up-a-team)
+- [Stages](#stages)
 - [SLA policies](#sla-policies)
 - [Working a ticket](#working-a-ticket)
 - [Canned responses](#canned-responses)
@@ -27,7 +28,7 @@ and customers.
 | **Team** | A support queue (e.g. "Customer Support") with its own members, working calendar, and email alias. |
 | **Stage** | A pipeline step a ticket moves through (New → In Progress → On Hold → Solved). Any stage can be marked as a *closing* stage. |
 | **SLA Policy** | A target resolution time (in working hours) matched to a ticket by team, priority, and tag. |
-| **Rating** | A one-click customer satisfaction score (Good / Okay / Bad) collected after a ticket closes. |
+| **Rating** | A customer satisfaction score (Good / Okay / Bad) collected after a ticket closes. |
 
 ## Setting up a team
 
@@ -39,6 +40,31 @@ and customers.
    creates a ticket automatically (see [Email-to-ticket](#email-to-ticket)).
 4. Enable **CSAT** if you want a rating-request email sent automatically
    whenever a ticket from this team is closed.
+
+## Stages
+
+Go to **Helpdesk ▸ Configuration ▸ Stages** to manage the pipeline.
+
+- **Per-team stages** — leave a stage's **Teams** field empty to share
+  it with every team, or pick one or more teams to offer it only to
+  them. Each team's pipeline is its own stages plus the shared ones,
+  in **Sequence** order: a new ticket starts in its team's first stage,
+  the kanban opened from a team shows only that team's columns, and the
+  ticket form only lets you pick stages valid for the ticket's team.
+  Moving a ticket to another team puts it in that team's first stage
+  (keeping it open or closed where possible) if its current stage isn't
+  available there.
+- **Stage emails** — set an **Email Template** on a stage to email the
+  customer whenever a ticket moves into it (for example "We're waiting
+  on your reply"). The email is also posted to the ticket's chatter.
+  Tickets created directly in that stage don't receive it, and neither
+  does a ticket closed by a merge. If the stage is also a closing stage
+  and the team has CSAT enabled, the customer receives the stage email
+  first and the rating request second.
+- **Reopening** — when a closed ticket moves back to an open stage (an
+  agent drags it, or the customer replies), its close date is cleared
+  and its SLA status is refreshed straight away. The SLA deadline still
+  counts from when the ticket was created; reopening doesn't restart it.
 
 ## SLA policies
 
@@ -101,10 +127,15 @@ time of the merge.
 ## Customer satisfaction (CSAT) ratings
 
 If a team has **CSAT** enabled, closing one of its tickets sends the
-customer an email with three one-click links: **Good**, **Okay**, or
-**Bad**. Clicking a link records the rating (once — the link can't be
-reused to change the rating later) and shows a thank-you page. Ratings
-roll up into each team's **CSAT** score on the Teams list and form.
+customer an email with three links: **Good**, **Okay**, or **Bad**.
+Clicking a link opens a short confirmation page; the rating is only
+recorded once the customer presses **Submit** there, and a thank-you
+page follows. The confirmation step stops email security scanners,
+which open every link in a message, from recording a rating the
+customer never gave. The links are signed per ticket: the customer can
+come back and change their rating for 7 days after first rating, after
+which it is locked. Ratings roll up into each team's **CSAT** score on
+the Teams list and form.
 
 ![CSAT rating request email](../static/description/screenshots/rating_email_en.png)
 
