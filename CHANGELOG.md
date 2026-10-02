@@ -6,6 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versions follow Odoo's `<series>.<major>.<minor>.<patch>.<build>` tagging
 convention (e.g. `v17.0.1.0.0`), tagged separately per supported series.
 
+## [1.1.0] - 2026-10-02
+
+Tagged as `v17.0.1.1.0` and `v19.0.1.1.0`.
+
+### Fixed
+
+- **CSAT ratings recorded by email link scanners** — the rating links in
+  the CSAT email now open a confirmation page and only record the
+  rating when the customer presses **Submit** (a POST that re-checks the
+  token, value and update window). Previously a plain GET recorded it,
+  so mail security scanners (Safe Links, Mimecast, Proofpoint, ...)
+  could record ratings the customer never gave.
+- **Stage email templates were never sent** — a stage's **Email
+  Template** is now posted to the ticket's chatter (and emailed to the
+  customer) whenever a ticket moves into that stage. Merging tickets
+  doesn't trigger it.
+- **Crash when an SLA calendar can't place a deadline** — a matched SLA
+  policy on a calendar with no working hours no longer breaks ticket
+  creation, closing, or the SLA cron; the ticket gets no SLA status and
+  a warning is logged for the admin.
+- **Reopened tickets kept stale close/SLA data** — reopening a ticket
+  now clears its close date and "SLA reached" flag (so team analytics
+  stop counting it as closed) and refreshes its SLA status and open
+  hours immediately. The SLA deadline stays anchored to creation; a
+  re-close is judged against it.
+- **Docs: CSAT links are not single-use** — the 1.0.0 notes, README and
+  Apps Store description called the rating token "single-use". It is a
+  signed per-ticket link that the customer can use to change their
+  rating for 7 days; the docs now say so.
+
+### Changed
+
+- **Per-team stages** — stages have a new **Teams** field. A stage with
+  no teams is shared by every team (all existing stages, so existing
+  pipelines are unchanged); one with teams is only offered to them. New
+  tickets start in their team's first stage, kanban columns opened from
+  a team show only its stages, changing a ticket's team moves it to a
+  valid stage, and customer replies reopen into the ticket team's first
+  open stage.
+
 ## [1.0.0] - 2026-07-19
 
 Initial release. Supports Odoo 17.0 and 19.0 in parallel, tagged
@@ -53,5 +93,7 @@ separately as `v17.0.1.0.0` and `v19.0.1.0.0`.
   both `odoo:17.0` and `odoo:19.0` images, including a browser-based
   (`clickbot`) UI regression pass.
 
+[1.1.0]: https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/releases/tag/v17.0.1.1.0
+[v19.0.1.1.0]: https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/releases/tag/v19.0.1.1.0
 [1.0.0]: https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/releases/tag/v17.0.1.0.0
 [v19.0.1.0.0]: https://github.com/Zahoor-ishfaq/odoo-helpdesk-pro/releases/tag/v19.0.1.0.0
