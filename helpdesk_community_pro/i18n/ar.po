@@ -344,6 +344,11 @@ msgid "Configuration"
 msgstr "الإعدادات"
 
 #. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "Confirm your rating"
+msgstr "أكّد تقييمك"
+
+#. module: helpdesk_community_pro
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_team_view_form
 msgid "Create tickets by sending an email to"
 msgstr "أنشئ تذاكر عن طريق إرسال بريد إلكتروني إلى"
@@ -459,8 +464,10 @@ msgstr "قالب البريد الإلكتروني"
 #. module: helpdesk_community_pro
 #: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_stage__mail_template_id
 msgid ""
-"Email automatically sent to the customer when a ticket enters this stage."
-msgstr "بريد إلكتروني يُرسل تلقائياً إلى العميل عند دخول التذكرة إلى هذه المرحلة."
+"Email automatically sent to the customer when a ticket moves into this stage"
+" from another one. Tickets created directly in this stage don't receive it."
+msgstr ""
+"بريد إلكتروني يُرسل تلقائياً إلى العميل عند انتقال التذكرة إلى هذه المرحلة من مرحلة أخرى. لا تتلقاه التذاكر المُنشأة مباشرة في هذه المرحلة."
 
 #. module: helpdesk_community_pro
 #: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_team__alias_domain
@@ -1055,8 +1062,10 @@ msgstr "التسلسل"
 
 #. module: helpdesk_community_pro
 #: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_ticket__close_date
-msgid "Set the first time the ticket enters a closed stage."
-msgstr "يُضبط عند دخول التذكرة إلى مرحلة مغلقة لأول مرة."
+msgid ""
+"Set each time the ticket enters a closed stage; cleared when it is reopened."
+msgstr ""
+"يُضبط في كل مرة تدخل فيها التذكرة إلى مرحلة مغلقة، ويُمسح عند إعادة فتحها."
 
 #. module: helpdesk_community_pro
 #: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_ticket__assign_date
@@ -1099,6 +1108,12 @@ msgstr "تم الحل"
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_ticket_view_search
 msgid "Stage"
 msgstr "المرحلة"
+
+#. module: helpdesk_community_pro
+#. odoo-python
+#: code:addons/helpdesk_community_pro/models/helpdesk_ticket.py:0
+msgid "Stage %(stage)s is not available for team %(team)s."
+msgstr "المرحلة %(stage)s غير متاحة للفريق %(team)s."
 
 #. module: helpdesk_community_pro
 #: model:ir.actions.act_window,name:helpdesk_community_pro.helpdesk_stage_action
@@ -1145,6 +1160,11 @@ msgid "Subject..."
 msgstr "الموضوع..."
 
 #. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "Submit"
+msgstr "إرسال"
+
+#. module: helpdesk_community_pro
 #: model:ir.model.fields,field_description:helpdesk_community_pro.field_helpdesk_sla__tag_id
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_tag_view_form
 msgid "Tag"
@@ -1179,10 +1199,16 @@ msgstr "أعضاء الفريق"
 #. module: helpdesk_community_pro
 #: model:ir.actions.act_window,name:helpdesk_community_pro.helpdesk_team_action
 #: model:ir.model.fields,field_description:helpdesk_community_pro.field_helpdesk_canned_response__team_ids
+#: model:ir.model.fields,field_description:helpdesk_community_pro.field_helpdesk_stage__team_ids
 #: model:ir.ui.menu,name:helpdesk_community_pro.helpdesk_menu_teams
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_team_view_list
 msgid "Teams"
 msgstr "الفرق"
+
+#. module: helpdesk_community_pro
+#: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_stage__team_ids
+msgid "Teams using this stage. Leave empty to share it with all teams."
+msgstr "الفرق التي تستخدم هذه المرحلة. اتركه فارغاً لمشاركتها مع جميع الفرق."
 
 #. module: helpdesk_community_pro
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
@@ -1339,6 +1365,11 @@ msgstr "الموعد النهائي بساعات العمل من سياسة ات
 
 #. module: helpdesk_community_pro
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "You are about to rate ticket"
+msgstr "أنت على وشك تقييم التذكرة"
+
+#. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
 msgid "You rated ticket"
 msgstr "لقد قيّمت التذكرة"
 
@@ -1350,6 +1381,11 @@ msgid ""
 msgstr ""
 "بـ\n"
 "                            \""
+
+#. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "as \""
+msgstr "بـ \""
 
 #. module: helpdesk_community_pro
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_team_view_form

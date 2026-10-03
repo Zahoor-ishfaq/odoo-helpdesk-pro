@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0-20260630\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-19 10:01+0000\n"
-"PO-Revision-Date: 2026-07-19 10:01+0000\n"
+"POT-Creation-Date: 2026-10-02 16:16+0000\n"
+"PO-Revision-Date: 2026-10-02 16:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -311,6 +311,11 @@ msgid "Configuration"
 msgstr ""
 
 #. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "Confirm your rating"
+msgstr ""
+
+#. module: helpdesk_community_pro
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_team_view_form
 msgid "Create tickets by sending an email to"
 msgstr ""
@@ -426,7 +431,8 @@ msgstr ""
 #. module: helpdesk_community_pro
 #: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_stage__mail_template_id
 msgid ""
-"Email automatically sent to the customer when a ticket enters this stage."
+"Email automatically sent to the customer when a ticket moves into this stage"
+" from another one. Tickets created directly in this stage don't receive it."
 msgstr ""
 
 #. module: helpdesk_community_pro
@@ -1013,7 +1019,8 @@ msgstr ""
 
 #. module: helpdesk_community_pro
 #: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_ticket__close_date
-msgid "Set the first time the ticket enters a closed stage."
+msgid ""
+"Set each time the ticket enters a closed stage; cleared when it is reopened."
 msgstr ""
 
 #. module: helpdesk_community_pro
@@ -1059,6 +1066,12 @@ msgid "Stage"
 msgstr ""
 
 #. module: helpdesk_community_pro
+#. odoo-python
+#: code:addons/helpdesk_community_pro/models/helpdesk_ticket.py:0
+msgid "Stage %(stage)s is not available for team %(team)s."
+msgstr ""
+
+#. module: helpdesk_community_pro
 #: model:ir.actions.act_window,name:helpdesk_community_pro.helpdesk_stage_action
 #: model:ir.ui.menu,name:helpdesk_community_pro.helpdesk_menu_stages
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_stage_view_list
@@ -1098,6 +1111,11 @@ msgid "Subject..."
 msgstr ""
 
 #. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "Submit"
+msgstr ""
+
+#. module: helpdesk_community_pro
 #: model:ir.model.fields,field_description:helpdesk_community_pro.field_helpdesk_sla__tag_id
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_tag_view_form
 msgid "Tag"
@@ -1132,9 +1150,15 @@ msgstr ""
 #. module: helpdesk_community_pro
 #: model:ir.actions.act_window,name:helpdesk_community_pro.helpdesk_team_action
 #: model:ir.model.fields,field_description:helpdesk_community_pro.field_helpdesk_canned_response__team_ids
+#: model:ir.model.fields,field_description:helpdesk_community_pro.field_helpdesk_stage__team_ids
 #: model:ir.ui.menu,name:helpdesk_community_pro.helpdesk_menu_teams
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.helpdesk_team_view_list
 msgid "Teams"
+msgstr ""
+
+#. module: helpdesk_community_pro
+#: model:ir.model.fields,help:helpdesk_community_pro.field_helpdesk_stage__team_ids
+msgid "Teams using this stage. Leave empty to share it with all teams."
 msgstr ""
 
 #. module: helpdesk_community_pro
@@ -1287,6 +1311,11 @@ msgstr ""
 
 #. module: helpdesk_community_pro
 #: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "You are about to rate ticket"
+msgstr ""
+
+#. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
 msgid "You rated ticket"
 msgstr ""
 
@@ -1295,6 +1324,11 @@ msgstr ""
 msgid ""
 "as\n"
 "                            \""
+msgstr ""
+
+#. module: helpdesk_community_pro
+#: model_terms:ir.ui.view,arch_db:helpdesk_community_pro.rating_feedback_page
+msgid "as \""
 msgstr ""
 
 #. module: helpdesk_community_pro

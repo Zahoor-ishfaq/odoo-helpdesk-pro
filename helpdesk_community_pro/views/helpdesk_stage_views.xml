@@ -9,6 +9,7 @@
                 <field name="name"/>
                 <field name="fold"/>
                 <field name="is_closed"/>
+                <field name="team_ids" widget="many2many_tags"/>
             </list>
         </field>
     </record>
@@ -25,6 +26,7 @@
                         <field name="fold"/>
                         <field name="is_closed"/>
                         <field name="mail_template_id"/>
+                        <field name="team_ids" widget="many2many_tags"/>
                     </group>
                 </sheet>
             </form>

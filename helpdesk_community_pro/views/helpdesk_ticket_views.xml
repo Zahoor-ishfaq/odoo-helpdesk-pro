@@ -16,10 +16,13 @@
                         type="action"
                         string="Merge"
                     />
+                    <!-- Same rule as helpdesk.stage._get_team_stages_domain():
+                         the team's own stages plus shared (team-less) ones. -->
                     <field
                         name="stage_id"
                         widget="statusbar"
                         options="{'clickable': '1'}"
+                        domain="['|', ('team_ids', '=', False), ('team_ids', 'in', [team_id])]"
                     />
                 </header>
                 <sheet>
